@@ -1,0 +1,40 @@
+{
+  "development": {
+    "username": "postgresql",
+    "database": "testdb",
+    "host": "localhost",
+    "port": "5432",
+    "dialect": "mysql",
+    "protocol": "postgres"
+  },
+  "test": {
+    "username": "tsdbadmin",
+    "password": "AVNS_Rt4icRCumkjyHpR_MaG",
+    "database": "defaultdb",
+    "host": "test-glimpse-laundrytechsolutions-cc7c.a.timescaledb.io",
+    "port": "15556",
+    "dialect": "mysql",
+    "protocol": "postgres",
+    "dialectOptions": {
+      "ssl": {
+        "require":true,
+        "rejectUnauthorized":false
+      }
+    }
+  },
+  "production": {
+    "username": "tsdbadmin",
+    "password": "AVNS_Rt4icRCumkjyHpR_MaG",
+    "database": "defaultdb",
+    "host": "test-glimpse-laundrytechsolutions-cc7c.a.timescaledb.io",
+    "port": "15556",
+    "dialect": "mysql",
+    "protocol": "postgres",
+    "dialectOptions": {
+      "ssl": {
+        "require":true,
+        "rejectUnauthorized":false
+      }
+    }
+  }
+}

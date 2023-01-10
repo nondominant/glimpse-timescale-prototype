@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Ag-Grid Basic Example</title>
+    <link rel="stylesheet" href="style/style.css"/>
+    <script src="https://unpkg.com/ag-grid-community/dist/ag-grid-community.min.js"></script>
+</head>
+<body>
+	<div class="gridwrapper">
+		<div class="navbar">
+			<a href="/employeeTable">Employee Table</a>
+			<a href="/assetTable">Asset Table</a>
+			<a href="/meterTable">Meter Table</a>
+			<a href="/productTable">Product Table</a>
+			<a href="/eventSourceTable">Event Source Table</a>
+		</div>
+		<div id="myGrid" style="height: 30rem; width:75rem;" class="ag-theme-alpine"></div>
+	</div>
+    <script type="module">
+	import { generateTable } from './js/editableTable.js';
+
+	const urlInsert = 'http://localhost:8000/insert/b/assetTable';
+	const urlRead = 'http://localhost:8000/read/assetTable';
+
+	var model = [
+	{ 
+		field: "assetKey" 
+	},
+	{ 
+		field: "assetName",
+		filter: 'agSetColumnFilter'
+	},
+	{ 
+		field: "status",
+		filter: 'agTextColumnFilter'
+	},
+	];
+	document.addEventListener('DOMContentLoaded', generateTable(model, urlInsert, urlRead)); 
+    </script>
+</body>
+</html>
