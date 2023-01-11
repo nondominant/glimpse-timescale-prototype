@@ -38,6 +38,12 @@ let reset = store.fullData;
 store.updateView(reset);
 }
 
+document.addEventListener('keydown', function(event) {
+  if (event.ctrlKey && event.key === 'z') {
+    resetView();
+  }
+});
+
 store.updateDataFunctions.push(setRowData);
 
 const gridOptions = {
@@ -53,8 +59,9 @@ const gridOptions = {
     return Object.values(params.data)[0];
   },
   onFilterChanged: function() {
+	  console.log('onFilterChanged');
 	let activeRows = [];
-	gridOptions.api.forEachNodeAfterFilter((node, index) => {activeRows.push(node)});
+	gridOptions.api.forEachNodeAfterFilter((node, index) => {activeRows.push(node.data)});
 	setTimeout(() => store.updateView(activeRows), 0);
   },
 
@@ -68,6 +75,7 @@ var eGridDiv = document.querySelector('#myGrid');
   new agGrid.Grid(eGridDiv, gridOptions);
 
 	agGrid.simpleHttpRequest({url: urlRead}).then(function(data) {
+		console.log('http data', data);
 		store.updateData(data);
 		store.updateView(data);
 	});

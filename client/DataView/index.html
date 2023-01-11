@@ -49,11 +49,8 @@
 		        // We create a Date object for comparison against the filter date
 		        var dateParts = dateAsString.split('-');
 		        var day = Number(dateParts[2]);
-			console.log(day);
 		        var month = Number(dateParts[1]) - 1;
-			console.log(year);
 		        var year = Number(dateParts[0]);
-			console.log(year);
 		        var cellDate = new Date(year, month, day);
 
 		        // Now that both parameters are Date objects, we can compare
@@ -224,9 +221,9 @@
 				wheelZoomPlugin({factor: 0.75})
 			],
 			scales: {
-				x: {
-					time: false,
-				},
+			//	x: {
+			//		time: false,
+			//	},
 			//	y: {
 			//		auto: false,
 			//	}
@@ -236,11 +233,13 @@
 				{
 					label: "One",
 					stroke: "red",
-				},
-				{
-					label: "Two",
-					stroke: "blue",
-				},
+				}
+			],
+			axes: [
+			{},
+			{
+
+			},
 			]
 		};
 
@@ -259,19 +258,66 @@
 	makeChart(data);
 	// ================== agGrid code
 	const p = (newData, currentChart = uChart) => {
-		let times = newData.map((obj) => { return obj.time });
-		console.log("PRINT ", times);
-		let arr1 = []; 
-		let arr2 = [];
-		for (let i = 0; i < 7; i++) {
-			arr1.push(Math.floor(Math.random() * 100));
-			arr2.push(Math.floor(Math.random() * 100));
+		console.log('updated data', newData);
+		let timeStrings = newData.map((obj) => { return obj.time });
+		let timeStamps = timeStrings.map((s) => { 
+			let d = new Date(s);
+			return Math.floor(d.getTime() / 1000);
+		});
+
+		let stepSize = {
+			"min": 60,
+			"hour": 36000,
+			"day": 86400,
+			"week": 604800,
+		};
+		//console.log('timeStamps', timeStamps);
+		let min = timeStamps[0];
+		//console.log('min', min);
+		let max = timeStamps[timeStamps.length -1];
+		//console.log('max', max);
+		let range = max - min;
+		//console.log('range',range);
+		let step = 0;
+		if (range < stepSize["hour"]) {
+	    		step = stepSize["hour"];
+		} else if (range < stepSize["day"]) {
+	    		step = stepSize["hour"];
+		} else if (range < stepSize["week"]) {
+	    		step = stepSize["hour"];
+		} else if (range > stepSize["week"]) {
+	    		step = stepSize["week"];
 		}
+		let k = 0;
+		let zeros = Array(timeStamps.length).fill(0);
+		let nextBoundary = min + step;
+		//console.log('step', step);
+
+		let ticks = [];
+		ticks.push(min);
+		for (let i = 0; i < timeStamps.length; i++) {
+	    	//console.log('i = ', i);
+		if (timeStamps[i] > nextBoundary) {
+			nextBoundary += step;
+			ticks.push(nextBoundary);
+			k ++;
+
+		}
+
+	    	//console.log('zeros ', zeros);
+		//console.log('k', k);
+	    	//console.log('zeros[k] ', zeros[k]);
+	    	//console.log('timeStamps[i] ', timeStamps[i]);
+	    	//console.log('timeStamps ', timeStamps);
+		zeros[k] += 1;
+		}
+		let outputArray = zeros.filter((x) => { return (x > 0)});
+
 		const testdata = [
-		[ 1, 2, 3, 4, 5, 6, 7],
-		arr1,
-		arr2,
+			ticks,
+			outputArray,
 		];
+		console.log('testdata', testdata);
 		setTimeout(() => currentChart.setData(testdata), 0)
 	}
 	dataStore.updateViewFunctions.push(p);
@@ -280,11 +326,3 @@
 </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
