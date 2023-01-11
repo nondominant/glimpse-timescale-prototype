@@ -169,41 +169,6 @@
 						}
 					});
 
-					// wheel scroll zoom
-					over.addEventListener("wheel", e => {
-						e.preventDefault();
-
-						let {left, top} = u.cursor;
-
-						let leftPct = left/rect.width;
-						let btmPct = 1 - top/rect.height;
-						let xVal = u.posToVal(left, "x");
-						let yVal = u.posToVal(top, "y");
-						let oxRange = u.scales.x.max - u.scales.x.min;
-						let oyRange = u.scales.y.max - u.scales.y.min;
-
-						let nxRange = e.deltaY < 0 ? oxRange * factor : oxRange / factor;
-						let nxMin = xVal - leftPct * nxRange;
-						let nxMax = nxMin + nxRange;
-						[nxMin, nxMax] = clamp(nxRange, nxMin, nxMax, xRange, xMin, xMax);
-
-						let nyRange = e.deltaY < 0 ? oyRange * factor : oyRange / factor;
-						let nyMin = yVal - btmPct * nyRange;
-						let nyMax = nyMin + nyRange;
-						[nyMin, nyMax] = clamp(nyRange, nyMin, nyMax, yRange, yMin, yMax);
-
-						u.batch(() => {
-							u.setScale("x", {
-								min: nxMin,
-								max: nxMax,
-							});
-
-							u.setScale("y", {
-								min: nyMin,
-								max: nyMax,
-							});
-						});
-					});
 				}
 			}
 		};
