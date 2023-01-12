@@ -287,9 +287,9 @@ const locationTableInsert = async (data) => {
     const time = new Date().getTime();
 	// update comes from Bluetooth Server, data contains employeeID & assetKey
 	// query productID from MachineStatusTable
-    const machineStatusRow = await machineStatusTable.findAll({
+    const machineStatusRow = await machineStatusTable.findOne({
 	    where: {
-		    meterID: data.meterID
+		    assetKey: data.assetKey
 	    }
     });
     const success = await locationTable.create({

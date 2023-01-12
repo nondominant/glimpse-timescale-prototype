@@ -20,17 +20,20 @@
 	</div>
     <script type="module">
 	    import { generateTable } from './js/editableTable.js';
-	    const urlInsert = 'http://localhost:8000/insert/b/employeeTable';
-	    const urlRead = 'http://localhost:8000/read/employeeTable';
-	    const urlDelete = 'http://localhost:8000/delete/employeeTable';
+	    const urlInsert = 'http://localhost:8000/insert/b/coachingMomentTable';
+	    const urlRead = 'http://localhost:8000/read/coachingMomentTable';
+	    const urlDelete = 'http://localhost:8000/delete/coachingMomentTable';
 	    var model = [
 	    {
-	    	field: "employeeID"
+	    	field: "employeeID",
+		filter: "agSetColumnFilter"
 	    },
 	    {
-	    	field: "employeeName",
-		editable: true,
+	    	field: "managerID",
 		filter: "agSetColumnFilter"
+	    },
+	    {
+	    	field: "note",
 	    }
 	    ];
 	    document.addEventListener('DOMContentLoaded', generateTable(model, urlInsert, urlRead, urlDelete));
