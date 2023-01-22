@@ -398,7 +398,7 @@ const sensorEventTableInsert = async (data) => {
     const success = await sensorEventTable.create({
 		time: time,
 		eventSourceID: eventSourceRow[0]["dataValues"]["eventSourceID"],
-		assetKey: eventSourceRow[0]["dataValues"]["assetKey,"],
+		assetKey: eventSourceRow[0]["dataValues"]["assetKey"],
 		employeeID: locationRow[0]["dataValues"]["employeeID"],
 		weightedSum: eventSourceRow[0]["dataValues"]["weightedSum"],
 		productID: locationRow[0]["dataValues"]["productID"]

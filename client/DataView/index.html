@@ -179,7 +179,9 @@
 		console.time('chart');
 
 		let opts = {
-			title: "Wheel Zoom & Drag",
+			title: "Click & Drag to Zoom",
+			tzDate: ts => uPlot.tzDate(new Date(ts * 1e3), 'Etc/UTC'),
+			tz: 'Etc/UTC',
 			width: 1200,
 			height: 800,
 			plugins: [
@@ -201,10 +203,12 @@
 				}
 			],
 			axes: [
-			{},
 			{
-
+			space: 100,
 			},
+			{
+			space: 20
+			}
 			]
 		};
 
