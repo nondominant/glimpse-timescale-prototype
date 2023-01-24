@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Basic Example</title>
+    <link rel="stylesheet" href="style/datepickerstyle.css"/>
+    <link rel="stylesheet" href="style/style.css"/>
+    <!--
+	    <script src="https://unpkg.com/ag-grid-community/dist/ag-grid-community.min.js"></script>
+    -->
+    <script src="js/agGrid.js"></script>
+    <link rel="stylesheet" href="style/uPlot.min.css">
+    <script src="js/uPlotLib.js"></script>
+    <script src="js/utils.js"></script>
+</head>
+<body>
+	<div class="bodywrapper">
+	<div class="navbar">
+		<a href="/sensorEvent">Sensor Event</a>
+		<a href="/resourceUsage">Resource Usage</a>
+		<a href="/machineStatus">Machine Status </a>
+		<a href="/location">Location</a>
+		<a href="/cbwTurns">CBW Turns </a>
+	</div>
+	<div id="grid_panel" class="gridwrapper">
+	<div class="inputrow">
+		<button onclick="showChart()" style="display:flex;margin:1.5rem;">Show Chart</button>
+	</div>
+		<div id="myGrid" style="height: 50rem; width:75rem;" class="ag-theme-alpine"></div>
+	</div>
+	<div id="chart_panel" class="chartwrapper overlaydown">
+		<div id="myChart" style="height: 50rem; width:75rem;"></div>
+	</div>
+	</div>
+    <script type="module">
+	    import { generateTimeSeriesTable } from './js/timeSeriesTable.js';
+	    const urlRead = 'http://localhost:8000/read/locationTable';
+	    var model = [
+	    {
+	    	field: "time",
+		filter: "agDateColumnFilter",
+		filterParams: {
+		    // provide comparator function
+		    comparator: function(filterLocalDateAtMidnight, cellValue) {
+		    	var dateTime = cellValue;
+			var dateArray = dateTime.split('T');
+
+		        var dateAsString = dateArray[0];
+
+		        if (dateAsString == null) {
+		    	return 0;
+		        }
+
+		        // In the example application, dates are stored as dd/mm/yyyy
+		        // We create a Date object for comparison against the filter date
+		        var dateParts = dateAsString.split('-');
+		        var day = Number(dateParts[2]);
+		        var month = Number(dateParts[1]) - 1;
+		        var year = Number(dateParts[0]);
+		        var cellDate = new Date(year, month, day);
+
+		        // Now that both parameters are Date objects, we can compare
+		        if (cellDate < filterLocalDateAtMidnight) {
+		    	return -1;
+		        } else if (cellDate > filterLocalDateAtMidnight) {
+		    	return 1;
+		        }
+		        return 0;
+		    }
+		}
+	    },
+	    {
+	    	field: "employeeID",
+		filter: "agSetColumnFilter"
+	    },
+	    {
+	    	field: "assetKey",
+		filter: "agSetColumnFilter"
+	    },
+	    {
+	    	field: "productID"
+	    }
+	    ];
+
+
+	    let dataStore = {
+	            fullData: [],
+	            viewData: [],
+	            updateDataFunctions: [],
+	            updateViewFunctions: [],
+	            updateData: function(newData) {
+	        	    this.fullData = newData;
+	        	    for (let i = 0; i < this.updateDataFunctions.length; i++) {
+	        		this.updateDataFunctions[i](newData);
+	        	    }
+	            },
+	            updateView: function(newData) {
+	        	    this.viewData = newData;
+	        	    for (let i = 0; i < this.updateViewFunctions.length; i++) {
+	        		this.updateViewFunctions[i](newData);
+	        	    }
+	            }
+	    }
+
+	function wheelZoomPlugin(opts) {
+		let factor = opts.factor || 0.75;
+
+		let xMin, xMax, yMin, yMax, xRange, yRange;
+
+		function clamp(nRange, nMin, nMax, fRange, fMin, fMax) {
+			if (nRange > fRange) {
+				nMin = fMin;
+				nMax = fMax;
+			}
+			else if (nMin < fMin) {
+				nMin = fMin;
+				nMax = fMin + nRange;
+			}
+			else if (nMax > fMax) {
+				nMax = fMax;
+				nMin = fMax - nRange;
+			}
+
+			return [nMin, nMax];
+		}
+
+		return {
+			hooks: {
+				ready: u => {
+					xMin = u.scales.x.min;
+					xMax = u.scales.x.max;
+					yMin = u.scales.y.min;
+					yMax = u.scales.y.max;
+
+					xRange = xMax - xMin;
+					yRange = yMax - yMin;
+
+					let over = u.over;
+					let rect = over.getBoundingClientRect();
+
+					// wheel drag pan
+					over.addEventListener("mousedown", e => {
+						if (e.button == 1) {
+						//	plot.style.cursor = "move";
+							e.preventDefault();
+
+							let left0 = e.clientX;
+						//	let top0 = e.clientY;
+
+							let scXMin0 = u.scales.x.min;
+							let scXMax0 = u.scales.x.max;
+
+							let xUnitsPerPx = u.posToVal(1, 'x') - u.posToVal(0, 'x');
+
+							function onmove(e) {
+								e.preventDefault();
+
+								let left1 = e.clientX;
+							//	let top1 = e.clientY;
+
+								let dx = xUnitsPerPx * (left1 - left0);
+
+								u.setScale('x', {
+									min: scXMin0 - dx,
+									max: scXMax0 - dx,
+								});
+							}
+
+							function onup(e) {
+								document.removeEventListener("mousemove", onmove);
+								document.removeEventListener("mouseup", onup);
+							}
+
+							document.addEventListener("mousemove", onmove);
+							document.addEventListener("mouseup", onup);
+						}
+					});
+
+				}
+			}
+		};
+	}
+
+	let uChart;
+	function makeChart(data) {
+		console.time('chart');
+
+		let opts = {
+			title: "Click & Drag to Zoom",
+			tzDate: ts => uPlot.tzDate(new Date(ts * 1e3), 'Etc/UTC'),
+			tz: 'Etc/UTC',
+			width: 1200,
+			height: 800,
+			plugins: [
+				wheelZoomPlugin({factor: 0.75})
+			],
+			scales: {
+			//	x: {
+			//		time: false,
+			//	},
+			//	y: {
+			//		auto: false,
+			//	}
+			},
+			series: [
+				{},
+				{
+					label: "One",
+					stroke: "red",
+				}
+			],
+			axes: [
+			{
+			space: 100,
+			},
+			{
+			space: 20
+			}
+			]
+		};
+
+
+		let chartElement = document.getElementById('myChart');
+		uChart = new uPlot(opts, data, chartElement);
+
+		console.timeEnd('chart');
+	}
+
+	const data = [
+		[ 1, 2, 3, 4, 5, 6, 7],
+		[40,43,60,65,71,73,80],
+		[18,24,37,55,55,60,63],
+	];
+	makeChart(data);
+	// ================== agGrid code
+	const p = (newData, currentChart = uChart) => {
+		console.log('updated data', newData);
+		let timeStrings = newData.map((obj) => { return obj.time });
+		let timeStamps = timeStrings.map((s) => { 
+			let d = new Date(s);
+			return Math.floor(d.getTime() / 1000);
+		});
+
+		let stepSize = {
+			"min": 60,
+			"hour": 36000,
+			"day": 86400,
+			"week": 604800,
+		};
+		//console.log('timeStamps', timeStamps);
+		let min = timeStamps[0];
+		//console.log('min', min);
+		let max = timeStamps[timeStamps.length -1];
+		//console.log('max', max);
+		let range = max - min;
+		//console.log('range',range);
+		let step = 0;
+		if (range < stepSize["hour"]) {
+	    		step = stepSize["hour"];
+		} else if (range < stepSize["day"]) {
+	    		step = stepSize["hour"];
+		} else if (range < stepSize["week"]) {
+	    		step = stepSize["hour"];
+		} else if (range > stepSize["week"]) {
+	    		step = stepSize["week"];
+		}
+		let k = 0;
+		let zeros = Array(timeStamps.length).fill(0);
+		let nextBoundary = min + step;
+		//console.log('step', step);
+
+		let ticks = [];
+		ticks.push(min);
+		for (let i = 0; i < timeStamps.length; i++) {
+	    	//console.log('i = ', i);
+		if (timeStamps[i] > nextBoundary) {
+			nextBoundary += step;
+			ticks.push(nextBoundary);
+			k ++;
+
+		}
+
+	    	//console.log('zeros ', zeros);
+		//console.log('k', k);
+	    	//console.log('zeros[k] ', zeros[k]);
+	    	//console.log('timeStamps[i] ', timeStamps[i]);
+	    	//console.log('timeStamps ', timeStamps);
+		zeros[k] += 1;
+		}
+		let outputArray = zeros.filter((x) => { return (x > 0)});
+
+		const testdata = [
+			ticks,
+			outputArray,
+		];
+		console.log('testdata', testdata);
+		setTimeout(() => currentChart.setData(testdata), 0)
+	}
+	dataStore.updateViewFunctions.push(p);
+	document.addEventListener('DOMContentLoaded', generateTimeSeriesTable(model, urlRead, dataStore));
+	// ================== agGrid code
+</script>
+</body>
+</html>

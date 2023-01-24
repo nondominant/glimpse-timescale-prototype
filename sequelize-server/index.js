@@ -287,16 +287,19 @@ const locationTableInsert = async (data) => {
     const time = new Date().getTime();
 	// update comes from Bluetooth Server, data contains employeeID & assetKey
 	// query productID from MachineStatusTable
+	console.log('data', data);
     const machineStatusRow = await machineStatusTable.findOne({
 	    where: {
 		    assetKey: data.assetKey
 	    }
     });
+	console.log('machineStatusRow', machineStatusRow);
+	console.log('machineStatusRow[0]["dataValues"]', machineStatusRow["dataValues"]);
     const success = await locationTable.create({
 		time: time,
 		employeeID: data.employeeID,
 		assetKey: data.assetKey,
-		productID: machineStatusRow[0]["dataValues"]["productID"]
+		productID: machineStatusRow["dataValues"]["productID"]
     });
     return success;
 };
@@ -386,10 +389,12 @@ const sensorEventTableInsert = async (data) => {
 		    macAddress: data.macAddress
 	    }
     });
+
+	console.log('eventSourceRow', eventSourceTable)
 	// findOne only returns most recent matching entry
     const locationRow = await locationTable.findOne({
 	    where: {
-		    assetKey: eventSourceRow.assetKey
+		    assetKey: eventSourceRow[0]["dataValues"]["assetKey"]
 
 	    }
     });
@@ -399,9 +404,9 @@ const sensorEventTableInsert = async (data) => {
 		time: time,
 		eventSourceID: eventSourceRow[0]["dataValues"]["eventSourceID"],
 		assetKey: eventSourceRow[0]["dataValues"]["assetKey"],
-		employeeID: locationRow[0]["dataValues"]["employeeID"],
+		employeeID: locationRow["dataValues"]["employeeID"],
 		weightedSum: eventSourceRow[0]["dataValues"]["weightedSum"],
-		productID: locationRow[0]["dataValues"]["productID"]
+		productID: locationRow["dataValues"]["productID"]
         });
     return success;
 };
@@ -476,41 +481,6 @@ let insertFunctions = {
 	'cbwTurnsTable' : cbwTurnsTableInsert
 }
 
-app.post('/insert/d/:table', async (req, res, next) => {
-    try {
-	let table = req.params.table; 
-	let data = JSON.parse(req.body);
-	//let data = {
-	//	assetKey: 4,
-	//	assetName: "cbw 3 - dryer 1",
-	//	status: "emergency maintenance"
-	//}
-	const handler = insertFunctions[table];
-	const success = await handler(data);
-	res.status(200).send(success);
-    } catch (e) {
-	return next(e);
-    }
-});
-app.post('/insert/a/:table', async (req, res, next) => {
-    try {
-	let table = req.params.table; 
-	if (!Object.keys(validTables).includes(table)) {
-	        res.status(400).send();
-	}
-	let data = JSON.parse(req.body);
-	//let data = {
-	//	assetKey: 4,
-	//	assetName: "cbw 3 - dryer 1",
-	//	status: "emergency maintenance"
-	//}
-	const handler = insertFunctions[table];
-	const success = await handler(data);
-	res.status(200).send(success);
-    } catch (e) {
-	return next(e);
-    }
-});
 app.post('/insert/b/:table', async (req, res, next) => {
     try {
 	let table = req.params.table; 
@@ -525,35 +495,20 @@ app.post('/insert/b/:table', async (req, res, next) => {
 	return next(e);
     }
 });
-app.post('/insert/c/:table', async (req, res, next) => {
+app.post('/insert/chunk/:table', async (req, res, next) => {
     try {
 	let table = req.params.table; 
 	if (!Object.keys(validTables).includes(table)) {
 	        res.status(400).send();
 	}
-	let data = {
-		employeeID: 1,
-		employeeName: 'joe mark'
+	let data = req.body.data;
+	let success = [];
+	for (let i = 0; i < data.length; i ++) {
+		const handler = insertFunctions[table];
+		const current = await handler(data[i]);
+		success.push(current);
 	}
-	const handler = insertFunctions[table];
-	const success = await handler(data);
 	res.status(200).send(success);
-    } catch (e) {
-	return next(e);
-    }
-});
-app.post('/insert/e/:table', async (req, res, next) => {
-    try {
-	let table = req.params.table; 
-	let data = req.body;
-	//let data = {
-	//	assetKey: 4,
-	//	assetName: "cbw 3 - dryer 1",
-	//	status: "emergency maintenance"
-	//}
-	const handler = insertFunctions[table];
-	await handler(data);
-	res.status(200).send('hello');
     } catch (e) {
 	return next(e);
     }
