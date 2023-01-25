@@ -498,15 +498,20 @@ app.post('/insert/b/:table', async (req, res, next) => {
 app.post('/insert/chunk/:table', async (req, res, next) => {
     try {
 	let table = req.params.table; 
+	console.log('table: ', table);
 	if (!Object.keys(validTables).includes(table)) {
 	        res.status(400).send();
 	}
 	let data = req.body.data;
+	console.log('data: ', data);
+	const handler = insertFunctions[table];
 	let success = [];
+	let current = null;
 	for (let i = 0; i < data.length; i ++) {
-		const handler = insertFunctions[table];
-		const current = await handler(data[i]);
+		console.log("data[i]", data[i]);
+		current = await handler(data[i]);
 		success.push(current);
+		console.log("success", success);
 	}
 	res.status(200).send(success);
     } catch (e) {

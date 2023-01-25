@@ -4,29 +4,10 @@
 // that the first column is the primary key.
 
 
-export function generateTable(selector, model, urlInsert, urlRead, urlDelete) {
+export function generateCSVTable(selector, model, fullData) {
 let hooks = {
-	refresh: () => {
-		console.log('refresh');
-		fetch(urlRead, {
-			method: 'GET', // or 'PUT'
-			headers: {
-			'Content-Type': 'application/json',
-			'Cache-Control': 'no-cache',
-			},
-		})
-		.then((response) => response.json())
-		.then((data) => {
-			console.log('response data', data);
-			setRowData(data);
-		})
-		.catch((error) => {
-			console.log(error);
-		});
-	},
-	clear: () => {
-		setRowData([{}]);
-	}
+	getData: () => { return getRowData(); },
+	clear: () => {setRowData([]);},
 }
 
 class removeRowButtonRenderer {
@@ -40,36 +21,17 @@ class removeRowButtonRenderer {
 		<button class="btn-tick"> ⚡ </button>
 		</span>
 		`;
-
 		// get references to the elements we want
 		this.eButton = this.eGui.querySelector('.btn-tick');
-
 		// add event listener to button
 		this.eventListener = () => {
-			console.log('params.data', params.data);
 			let appendedData = [...rowData, params.data];
-			console.log('appendedData', appendedData);
 			//reset pinned row
-			fetch(urlInsert, {
-				method: 'POST', // or 'PUT'
-				headers: {
-				'Content-Type': 'application/json',
-				},
-				body: JSON.stringify(params.data),
-			})
-			.then((response) => response.json())
-			.then((data) => {
-				setRowData(appendedData);
-			})
-			.catch((error) => {
-				console.log(error);
-			});
+			setRowData(appendedData);
 			setInputRow({});
 		// else statment handles all other rows
-
 		};
 		this.eButton.addEventListener('click', this.eventListener);
-
 		} else {
 		// create the cell
 		this.eGui = document.createElement('div');
@@ -78,30 +40,15 @@ class removeRowButtonRenderer {
 		<button class="btn-simple"> ✖ </button>
 		</span>
 		`;
-
 		// get references to the elements we want
 		this.eButton = this.eGui.querySelector('.btn-simple');
-
 		// add event listener to button
 		this.eventListener = () => {
-		//	let nodeID = Object.values(params.data)[0];
-		//	let node = gridOptions.api.getRowNode(Object.values(params.data)[0]);
-		//gridOptions.api.updateRowData({remove: [params.data]});
 			gridOptions.api.applyTransaction({remove: [params.data]});
-
-			//let selectedData = params.data; 
-			fetch(urlDelete, {
-				method: 'POST', // or 'PUT'
-				headers: {
-				'Content-Type': 'application/json',
-				},
-				body: JSON.stringify(params.data),
-			}).then((data) => {
-				hooks.refresh();
-			});
+			setRowData(gridOptions.api.rowModel.rowsToDisplay.map(x => x.data));
+		
 		};
 		this.eButton.addEventListener('click', this.eventListener);
-
 		}
 	}
 
@@ -112,7 +59,6 @@ class removeRowButtonRenderer {
 	// gets called whenever the cell refreshes
 	refresh(params) {
 	// return true to tell the grid we refreshed successfully
-	console.log('refreshed');
 	return true;
 	}
 
@@ -132,13 +78,16 @@ let inputRow = {};
 
 function setRowData(newData) {
 rowData = newData;
-console.log('new row data', rowData);
 gridOptions.api.setRowData(rowData);
 }
 
 function setInputRow(newData) {
 inputRow = newData;
 gridOptions.api.setPinnedTopRowData([inputRow]);
+}
+
+function getRowData() {
+return rowData;
 }
 
 
@@ -161,7 +110,7 @@ const gridOptions = {
   },
 
   getRowStyle: ({ node }) =>
-    node.rowPinned ? { 'color': 'rgba(194,194,194)', 'font-style': 'italic' } : 0,
+	{ node.rowPinned ? { 'color': 'rgba(194,194,194)', 'font-style': 'italic' } : 0},
 
   onCellEditingStopped: (params) => {
 	if (params.node.rowPinned === 'top') {
@@ -170,27 +119,11 @@ const gridOptions = {
 		}
 	} else {
 		let appendedData = [...rowData, inputRow];
-		fetch(urlInsert, {
-			method: 'POST', // or 'PUT'
-			headers: {
-			'Content-Type': 'application/json',
-			},
-			body: JSON.stringify(params.data),
-		})
-		.then((response) => response.json())
-		.then((data) => {
-			setRowData(appendedData);
-		})
-		.catch((error) => {
-			console.log(error);
-		});
+		setRowData(appendedData);
 	}
 
 	// handle edit to pinned row 
   },
-    onGridReady: (params) => {
-      document.addEventListener('keydown', keyDownListener);
-    },
 };
 
 function isEmptyPinnedCell({ node, value }) {
@@ -210,36 +143,14 @@ function isPinnedRowDataCompleted(params) {
   return columnDefs.every((def) => inputRow[def.field]);
 }
 
-function keyDownListener(e) {
-	if (e.keyCode === 8 || e.keyCode === 46) {
-		const sel = gridOptions.api.getSelectedRows();
-		gridOptions.api.applyTransaction({remove: sel});
-	}
-}
 //----------------------------------------------------
-// attach the key down listener
+// lookup the container we want the Grid to use
+var eGridDiv = document.querySelector(selector);
 
+  // create the grid passing in the div to use together with the columns &amp; data we want to use
+  new agGrid.Grid(eGridDiv, gridOptions);
+	setTimeout((fullData) => {setRowData(fullData)}, 0, fullData);
 
-	// lookup the container we want the Grid to use
-	var eGridDiv = document.querySelector(selector);
-
-	// create the grid passing in the div to use together with the columns &amp; data we want to use
-	new agGrid.Grid(eGridDiv, gridOptions);
-	fetch(urlRead, {
-		method: 'GET', // or 'PUT'
-		headers: {
-		'Content-Type': 'application/json',
-		'Cache-Control': 'no-cache',
-		},
-	})
-	.then((response) => response.json())
-	.then((data) => {
-		setRowData(data);
-	})
-	.catch((error) => {
-		console.log(error);
-	});
-
-	return hooks;
+  return hooks;
 };
 

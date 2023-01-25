@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Basic Example</title>
-    <link rel="stylesheet" href="style/style.css"/>
-    <script src="https://unpkg.com/ag-grid-community/dist/ag-grid-community.min.js"></script>
+	<title>Basic Example</title>
+	<link rel="stylesheet" href="style/style.css"/>
+	<script src="https://unpkg.com/ag-grid-community/dist/ag-grid-community.min.js"></script>
+	<script src="js/papaparse.js"></script>
+
 </head>
 <body>
 
@@ -16,10 +18,22 @@
 		<a href="/eventSourceTable">Event Source Table</a>
 		<a href="/coachingMomentTable">Coaching Moment</a>
 	</div>
-		<div id="myGrid" style="height: 30rem; width:75rem;" class="ag-theme-alpine"></div>
+		<div>
+			<button id="uploadButton">Upload</button>
+			<input type="file" id="myfile" accept=".csv">
+		</div>
+		<div style="display:flex;flex-direction:row;">
+			<div id="result" style="height: 30rem; width:45vw; border: solid red 2px;" class="ag-theme-alpine"></div>
+			<div id="myGrid" style="height: 30rem; width:45vw; border: solid blue 2px;" class="ag-theme-alpine"></div>
+		</div>
+
 	</div>
     <script type="module">
 	    import { generateTable } from './js/editableTable.js';
+	    import { f } from './js/uploader.js';
+
+	    document.addEventListener('DOMContentLoaded', () => {
+	    // editable table
 	    const urlInsert = 'http://localhost:8000/insert/b/employeeTable';
 	    const urlRead = 'http://localhost:8000/read/employeeTable';
 	    const urlDelete = 'http://localhost:8000/delete/employeeTable';
@@ -33,7 +47,11 @@
 		filter: "agSetColumnFilter"
 	    }
 	    ];
-	    document.addEventListener('DOMContentLoaded', generateTable(model, urlInsert, urlRead, urlDelete));
+	    let hooks = generateTable('#myGrid', model, urlInsert, urlRead, urlDelete);
+
+	f('#myfile', '#uploadButton', model, hooks);
+
+    });
     </script>
 </body>
 </html>
