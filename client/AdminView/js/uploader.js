@@ -12,13 +12,13 @@ function readFile() {
   var reader = new FileReader();
   var content = reader.readAsText(file);
   reader.onload = () => {
+    let result = reader.result.split(/\r\n/)
+    console.log('reader result', reader.result.split(/\r\n/));
     var data = Papa.parse(reader.result, { header: true });
     if (data.errors.length) {
       console.error(data.errors)
     } else {
       let csvhooks = generateCSVTable('#result', model, data.data, urlInsert, urlRead, urlDelete)
-      console.log(csvhooks);
-      console.log(csvhooks.getData());
       activateButton(csvhooks, buttonID)
     }
   };
@@ -30,7 +30,6 @@ function activateButton(csvhooks, buttonID) {
 	let button = document.querySelector(buttonID)
 	button.addEventListener("click", () => {
 		let fileData = csvhooks.getData();
-		console.log('sending', fileData);
 		try {
 		let fileAsJSON = {
 			data: fileData,
