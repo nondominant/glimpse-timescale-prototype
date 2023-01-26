@@ -518,6 +518,95 @@ app.post('/insert/chunk/:table', async (req, res, next) => {
 	return next(e);
     }
 });
+app.post('/insert/migrate/:table', async (req, res, next) => {
+    try {
+	let table = req.params.table; 
+	if (!Object.keys(validTables).includes(table)) {
+	        res.status(400).send();
+	}
+	let data = req.body.data;
+	let firstEntry = data[0];
+	let fields = Object.keys(firstEntry);
+	let keyMap = ["time","assetKey","exitingProductID","enteringProductID","employeeID","ProductID","meterID","usageIncrement","unit","type","status","eventSourceID","weightedSum"];
+	let flags = fields.map((x, i) => {
+	return keyMap.includes(x) ? Math.pow(2, keyMap.indexOf(x)) : 0;
+	});
+
+	let total = flags.reduce((prev, curr) => {
+	    return prev + curr;
+	});
+	
+	let handler = null;
+	if (total === 15) {
+		handler = (data) =>  { 
+			cbwTurnsTable.create({
+			      time: data.time,
+			      assetKey: data.assetKey,
+			      exitingProductID: data.exitingProductID,
+			      enteringProductID: data.enteringProductID
+			    })
+		};
+	} else if (total === 51) {
+		handler = (data) => {
+			locationTable.create({
+				time: data.time,
+				employeeID: data.employeeID,
+				assetKey: data.assetKey,
+				productID: data.productID,
+			});
+		};
+	} else if (total === 963) {
+		handler = (data) => {
+			resourceUsageTable.create({
+				time: data.time,
+				meterID: data.meterID,
+				usageIncrement: data.usageIncrement,
+				unit: data.unit, 
+				type: data.type,
+				assetKey: data.assetKey,
+			});
+		};
+	} else if (total === 1059) {
+		handler = (data) => { 
+			machineStatusTable.create({
+				time: data.time,
+				assetKey: data.assetKey, 
+				status: data.status,
+				productID: data.productID
+			})
+		};
+	} else if (total === 6195) {
+		handler = (data) => {
+			sensorEventTable.create({
+				time: data.time,
+				eventSourceID: data.eventSourceID,
+				assetKey: data.assetKey,
+				employeeID: data.employeeID,
+				weightedSum: data.weightedSum,
+				productID: data.productID,
+			});
+		};
+
+	} else {
+		//throw error
+	        res.status(400).send('fields don"t match database');
+	}
+
+	let success = [];
+	let current = null;
+	for (let i = 0; i < data.length; i ++) {
+		console.log("data[i]", data[i]);
+		current = await handler(data[i]);
+		success.push(current);
+		console.log("success", success);
+	}
+	res.status(200).send(success);
+    } catch (e) {
+	return next(e);
+    }
+
+
+});
 
 app.post('/delete/:table', async (req, res, next) => {
     try {

@@ -1,0 +1,126 @@
+<html>
+	<head>
+		<script src="./papaparse.js"></script>
+	</head>
+	<body>
+		<h1>Upload CSV file to database</h1>
+<h4>A preview of the file will be displayed below. If you are satisfied with the data, press 'upload'</h4>
+<p>If you are not happy with the data, either select a new file or refresh the page.</p>
+<input id="databaseSelector" type="text" list="tables">
+<datalist id="tables">
+<option value="CBW Turn Event Database">
+<option value="Location Event Database">
+<option value="Machine Status Event Database">
+<option value="Resource Usage Database">
+<option value="Sensor Event Database">
+</datalist>
+<button id="uploadButton">Upload</button>
+<input type="file" id="myfile" accept=".csv">
+
+<div>
+  <span id="errorMessage" style="color:red; font-weight: 500"></span>
+</div>
+<hr>
+<div id="result">
+</div>
+		<script>
+			let hashMap = {
+"CBW Turn Event Database": "http://localhost:8000/insert/chunk/cbwTurnsTable",
+"Location Event Database": "http://localhost:8000/insert/chunk/locationTable", 
+"Machine Status Event Database": "http://localhost:8000/insert/chunk/machineStatusTable",
+"Resource Usage Database": "http://localhost:8000/insert/chunk/resourceUsageTable", 
+"Sensor Event Database": "http://localhost:8000/insert/chunk/sensorEventTable",
+			};
+//==========================================================================
+function activateButton(data, buttonID) {
+	console.log("data i got" , data);
+	let button = document.querySelector(buttonID)
+	button.addEventListener("click", () => {
+		let dataList = document.getElementById('databaseSelector');
+		let endpoint = hashMap[dataList.value];
+		let fileData = data;
+		try {
+		let fileAsJSON = {
+			data: fileData,
+		}
+		let stringFile = JSON.stringify(fileAsJSON);
+		console.log('body of request', stringFile);
+		fetch(endpoint, {
+			method: 'POST',
+			headers: {
+				'Content-Type':'application/json',
+			},
+			body: stringFile,
+		})
+		.then((response) => { 
+			console.log(response);
+			return response.json();
+		})
+		.then((data) => {
+			console.log(data);
+		})
+		.catch((error) => {
+			console.log(error);
+		});
+		} catch {
+			alert('please select a file');
+		}
+	});
+}
+//==========================================================================
+var fileInput = document.getElementById("myfile");
+fileInput.addEventListener("change", readFile);
+
+function readFile() {  
+  document.getElementById('errorMessage').innerHTML = ""
+  var file = document.getElementById("myfile").files[0];
+  var reader = new FileReader();
+
+  let content = reader.readAsText(file);
+  reader.onload = function () {
+    var data = Papa.parse(reader.result, { header: true });
+
+    if (data.errors.length) {
+      document.getElementById('errorMessage').innerHTML = "* Error parsing CSV: " + JSON.stringify(data.errors)      
+      console.error(data.errors)
+    } else {
+      
+      generateTable(data.meta.fields, data.data)
+      activateButton(data.data, '#uploadButton')
+    }
+  };
+}
+
+function generateTable(columns, rows) {
+  var result = `<table>
+    <thead>
+      <tr>
+        @header
+      <tr>
+    </thead>
+    <tbody>
+      @body
+    </tbody>
+  </table>`;
+
+  var header = "";
+  columns.forEach((h) => (header += `<th>${h}</th>`));
+  result = result.replace("@header", header);
+
+  var body = "";
+  rows.forEach((row) => {
+    var keys = Object.keys(row)
+    var b = "";
+    keys.forEach((k) => {
+      b += `<td>${row[k]}</td>`
+    });
+    body += "<tr>" + b + "</tr>"
+  });
+  result = result.replace("@body", body);
+
+  console.log(result)
+  document.getElementById("result").innerHTML = result;
+}
+		</script>
+	</body>
+</html>

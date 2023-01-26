@@ -4,6 +4,8 @@
     <title>Ag-Grid Basic Example</title>
     <link rel="stylesheet" href="style/style.css"/>
     <script src="https://unpkg.com/ag-grid-community/dist/ag-grid-community.min.js"></script>
+    <script src="js/papaparse.js"></script>
+
 </head>
 <body>
 	<div class="gridwrapper">
@@ -15,11 +17,22 @@
 			<a href="/eventSourceTable">Event Source Table</a>
 			<a href="/coachingMomentTable">Coaching Moment</a>
 		</div>
-		<div id="myGrid" style="height: 30rem; width:75rem;" class="ag-theme-alpine"></div>
+		<div>
+			<button id="uploadButton">Upload</button>
+			<input type="file" id="myfile" accept=".csv">
+		</div>
+		<div style="display:flex;flex-direction:row;">
+			<div id="result" style="height: 30rem; width:45vw; border: solid red 2px;" class="ag-theme-alpine"></div>
+			<div id="myGrid" style="height: 30rem; width:45vw; border: solid blue 2px;" class="ag-theme-alpine"></div>
+		</div>
+
+
 	</div>
     <script type="module">
 	import { generateTable } from './js/editableTable.js';
+	import { f } from './js/uploader.js';
 
+	document.addEventListener('DOMContentLoaded', () => {
 	const urlInsert = 'http://localhost:8000/insert/b/productTable';
 	const urlRead = 'http://localhost:8000/read/productTable';
 
@@ -37,7 +50,9 @@
 		editable: true
 	},
 	];
-	document.addEventListener('DOMContentLoaded', generateTable('#myGrid', model, urlInsert, urlRead)); 
+	let hooks = generateTable('#myGrid', model, urlInsert, urlRead); 
+	f('#myfile', '#uploadButton', model, hooks);
+	});
     </script>
 </body>
 </html>
