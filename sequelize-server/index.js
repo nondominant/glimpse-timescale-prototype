@@ -518,12 +518,8 @@ app.post('/insert/chunk/:table', async (req, res, next) => {
 	return next(e);
     }
 });
-app.post('/insert/migrate/:table', async (req, res, next) => {
+app.post('/insert/migrate', async (req, res, next) => {
     try {
-	let table = req.params.table; 
-	if (!Object.keys(validTables).includes(table)) {
-	        res.status(400).send();
-	}
 	let data = req.body.data;
 	let firstEntry = data[0];
 	let fields = Object.keys(firstEntry);
@@ -538,27 +534,30 @@ app.post('/insert/migrate/:table', async (req, res, next) => {
 	
 	let handler = null;
 	if (total === 15) {
-		handler = (data) =>  { 
+		handler = async (data) =>  { 
 			cbwTurnsTable.create({
-			      time: data.time,
+			// the + operator coerces the string data.time into a number
+			      time: +data.time,
 			      assetKey: data.assetKey,
 			      exitingProductID: data.exitingProductID,
 			      enteringProductID: data.enteringProductID
 			    })
 		};
 	} else if (total === 51) {
-		handler = (data) => {
+		handler = async (data) => {
 			locationTable.create({
-				time: data.time,
+			// the + operator coerces the string data.time into a number
+				time: +data.time,
 				employeeID: data.employeeID,
 				assetKey: data.assetKey,
 				productID: data.productID,
 			});
 		};
 	} else if (total === 963) {
-		handler = (data) => {
+		handler = async (data) => {
 			resourceUsageTable.create({
-				time: data.time,
+			// the + operator coerces the string data.time into a number
+				time: +data.time,
 				meterID: data.meterID,
 				usageIncrement: data.usageIncrement,
 				unit: data.unit, 
@@ -567,18 +566,20 @@ app.post('/insert/migrate/:table', async (req, res, next) => {
 			});
 		};
 	} else if (total === 1059) {
-		handler = (data) => { 
+		handler = async (data) => { 
 			machineStatusTable.create({
-				time: data.time,
+			// the + operator coerces the string data.time into a number
+				time: +data.time,
 				assetKey: data.assetKey, 
 				status: data.status,
 				productID: data.productID
 			})
 		};
 	} else if (total === 6195) {
-		handler = (data) => {
+		handler = async (data) => {
 			sensorEventTable.create({
-				time: data.time,
+			// the + operator coerces the string data.time into a number
+				time: +data.time,
 				eventSourceID: data.eventSourceID,
 				assetKey: data.assetKey,
 				employeeID: data.employeeID,
@@ -594,6 +595,12 @@ app.post('/insert/migrate/:table', async (req, res, next) => {
 
 	let success = [];
 	let current = null;
+
+	//catch case where handler remains null somehow? 
+	//-----------------------------------
+	if (handler === null) { return next(e) };
+	//-----------------------------------
+
 	for (let i = 0; i < data.length; i ++) {
 		console.log("data[i]", data[i]);
 		current = await handler(data[i]);

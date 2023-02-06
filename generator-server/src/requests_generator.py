@@ -55,14 +55,14 @@ if __name__ == '__main__':
     ]
 
 
-#    for w in params3: 
-#        process_handles.append(Process(target=send_event_minutely, args=(w['url'], w['data'], 0)))
-#
+    for w in params3: 
+        process_handles.append(Process(target=send_event_minutely, args=(w['url'], w['data'], 0)))
+
     for z in params2: 
         process_handles.append(Process(target=send_event_minutely, args=(z['url'], z['data'], 120)))
 
-#    for x in params:
-#        process_handles.append(Process(target=send_event_minutely, args=(x['url'], x['data'], 30)))
+    for x in params:
+        process_handles.append(Process(target=send_event_minutely, args=(x['url'], x['data'], 30)))
 
 
 

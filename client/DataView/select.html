@@ -11,27 +11,202 @@
     <link rel="stylesheet" href="style/uPlot.min.css">
     <script src="js/uPlotLib.js"></script>
     <script src="js/utils.js"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 <body>
 	<div class="bodywrapper">
-	<div class="navbar">
-		<a href="/sensorEvent">Sensor Event</a>
-		<a href="/resourceUsage">Resource Usage</a>
-		<a href="/machineStatus">Machine Status </a>
-		<a href="/location">Location</a>
-		<a href="/cbwTurns">CBW Turns </a>
+		<div class="navbar">
+			<div x-data="{activeTitle: 'Table'}">
+				<button onclick="showChart()" style="display:flex;margin:1.5rem;" x-on:click="activeTitle = (activeTitle === 'Table') ? 'Chart' : 'Table'" x-text="activeTitle"></button>
+			</div>
+		</div>
+
+
+		<div id="work_space" class="work_space">
+			<div class="tabheader">
+				<div id="addbutton" class="tab" data-tab-number="tab0"><h3>+</h3></div>
+				<div class="tab" data-tab-number="tab1"><h3>tab 1</h3></div>
+				<div class="tab" data-tab-number="tab2"><h3>tab 2</h3></div>
+				<div class="tab" data-tab-number="tab3"><h3>tab 3</h3></div>
+			</div>
+			<div id="tabmenu" class="tabbody tabinactive" data-tab-number="tab0">
+				<button>one</button>
+				<button>two</button>
+				<button>three</button>
+				<button>four</button>
+			</div>
+			<div class="tabbody tabinactive" data-tab-number="tab1">
+			</div>
+			<div class="tabbody tabinactive" data-tab-number="tab2">
+				<div class="sidepanel">
+				</div>
+				<div class="tabpanel">
+					<div id="grid_panel" class="gridwrapper">
+					</div>
+				</div>
+			</div>
+			<div class="tabbody tabinactive" data-tab-number="tab3">
+			</div>
+		</div>
+
+
+
+		<div id="chart_panel" class="chartwrapper overlaydown">
+			<div id="myChart" style="height: 100%; width:100%;"></div>
+		</div>
+
+
 	</div>
-	<div id="grid_panel" class="gridwrapper">
-	<div class="inputrow">
-		<button onclick="showChart()" style="display:flex;margin:1.5rem;">Show Chart</button>
+	<!-- templates -->
+	<div style="visibility: hidden;">
+	<div id="templatebody" class="tabbody tabinactive" data-tab-number="tab1">
+		<div class="sidepanel">
+		</div>
+		<div class="tabpanel">
+			<div id="grid_panel" class="gridwrapper">
+			</div>
+		</div>
 	</div>
-		<div id="myGrid" style="height: 50rem; width:75rem;" class="ag-theme-alpine"></div>
+
+	
+	<div id="templatelinetab" class="linetab">
+		<div class="linetabremove tabinactive"></div>
+		<div class="linetabadd tabinactive"></div>
+		<div class="linetabexpand"></div>
 	</div>
-	<div id="chart_panel" class="chartwrapper overlaydown">
-		<div id="myChart" style="height: 50rem; width:75rem;"></div>
 	</div>
-	</div>
+
+
+	<div id="templatetab" class="tab" data-tab-number="tab1"><h3>New</h3></div>
+	<!-- templates -->
     <script type="module">
+
+	// ================== selecting a root =====================
+	    function initTabMenu(element) {
+	    	// hook up listeners if needed to store data / filters in the correct place
+	    	return element;
+	    }
+	    function initTabChangeHandlers(tab) {
+	    	return tab;
+	    }
+	    function addTab() {
+	    let tabData = "tab" + (Math.floor(Math.random() * (9999 - 1000) + 1000));
+	    let bodyID = "body_" + tabData;
+	    let tabID = "tab_" + tabData;
+
+	    // create and insert menu panel as a new tab body
+	    let tempBody = document.querySelector("#tabmenu");
+	    let newBody = tempBody.cloneNode(true);
+	    newBody.dataset.tabNumber = tabData;
+	    newBody.id = bodyID
+	    let readyBody = initTabMenu(newBody);
+	    tempBody.after(readyBody);
+
+	    //create and insert new tab
+	    let tempTab = document.querySelector("#templatetab");
+	    let newTab = tempTab.cloneNode(true);
+	    newTab.dataset.tabNumber = tabData;
+	    newTab.id = tabID;
+	    let readyTab = initTabHandlers(newTab);
+	    document.querySelector("#addbutton").after(readyTab);
+
+	    // set new tab as active
+	    
+
+	    //clone children of addtab
+	    //create new tab + body with matching data-tab-number
+	    //insert after addTab body, insert after addTab tab
+	    	
+	    	console.log("add tab");
+	    }
+
+	    let addButton = document.querySelector("#addbutton");
+	    addButton.addEventListener("click", addTab);
+
+	    let testingArray = document.querySelectorAll('.sidepanel');
+	    for (let i = 0; i < testingArray.length; i++) {
+	    	let tempNode = document.querySelector("#templatelinetab");
+		let newNode = tempNode.cloneNode(true);
+		let readyNode = initLineTab(newNode);
+		readyNode.id = "linetab_" + (Math.floor(Math.random() * (999 - 100) + 100));
+	    	testingArray[i].appendChild(readyNode);
+	    }
+
+	    function addLine(lineTab) {
+	    	let tempNode = document.querySelector("#templatelinetab");
+		let newNode = tempNode.cloneNode(true);
+		let readyNode = initLineTab(newNode);
+		readyNode.id = "linetab_" + (Math.floor(Math.random() * (999 - 100) + 100));
+		lineTab.after(readyNode);
+		//insertAfter
+	    }
+
+	    function initLineTab(lineTab) {
+	    	let childs = lineTab.children
+		let removeTab, addTab, expandTab;
+		for (let i = 0; i < childs.length; i++) {
+			if(childs[i].classList.contains("linetabremove")) {
+				removeTab = childs[i];
+			} else if(childs[i].classList.contains("linetabadd")) {
+				addTab = childs[i];
+			} else if(childs[i].classList.contains("linetabexpand")) {
+				expandTab = childs[i];
+			}
+		}
+		removeTab.addEventListener("click", () => {
+			if(lineTab.parentNode.children.length === 1) {
+				console.log('but dont');
+				return;
+			}
+			lineTab.remove();
+		});
+		addTab.addEventListener("click", () => {
+			addLine(lineTab);
+			
+		});
+		expandTab.addEventListener("click", () => {
+			if (addTab.classList.contains("tabinactive")) {
+				addTab.classList.add("tabactive")
+				removeTab.classList.add("tabactive")
+				addTab.classList.remove("tabinactive")
+				removeTab.classList.remove("tabinactive")
+			} else {
+				addTab.classList.add("tabinactive")
+				removeTab.classList.add("tabinactive")
+				addTab.classList.remove("tabactive")
+				removeTab.classList.remove("tabactive")
+			}
+		});
+		return lineTab;
+	    }
+	    
+	    function swapTab(tabNumber, e) {
+	    	
+		let target = null;
+		let tabs = document.querySelectorAll('.tabbody');
+		console.log(tabs)
+		for (let i = 0; i < tabs.length; i++) {
+			console.log(tabs[i].dataset.tabNumber)
+		    if( tabs[i].dataset.tabNumber === tabNumber) { target = tabs[i] }
+		    tabs[i].classList.remove("tabactive")
+		    tabs[i].classList.add("tabinactive")
+		}
+		target.classList.remove("tabinactive");
+		target.classList.add("tabactive");
+	    }
+
+	    let tabs = document.querySelectorAll('.tab');
+	    for (let i = 0; i < tabs.length; i++) {
+		tabs[i].addEventListener("click", swapTab.bind(null, tabs[i].dataset.tabNumber));
+	    }
+	//article.dataset.indexNumber    
+	    // insert buttons
+	    // buttons call query with different parameters
+	    //query returns with data, stored modified before being appended to ground truth
+	    // create and append ag Grid, agGrid needs a 'filters' object
+
+	// ================== =====================
+
 	    import { generateTimeSeriesTable } from './js/timeSeriesTable.js';
 
 
@@ -367,8 +542,9 @@
 		setTimeout(() => currentChart.setData(testdata), 0)
 	}
 	dataStore.updateViewFunctions.push(p);
-	document.addEventListener('DOMContentLoaded', generateTimeSeriesTable(model, urlRead, dataStore));
+	//document.addEventListener('DOMContentLoaded', generateTimeSeriesTable(model, urlRead, dataStore));
 	// ================== agGrid code
+
 </script>
 </body>
 </html>

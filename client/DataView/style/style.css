@@ -13,6 +13,88 @@ body {
 	margin: 0;
 	padding: 0;
 }
+.work_space {
+	display: flex;
+	flex-direction: column;
+	background: yellow;
+	height: 40rem;
+	width: 80rem;
+}
+.tabheader {
+	display: flex;
+	background: red;
+}
+.addtab {
+	padding-left: 20px;
+	height: 50px;
+	width: 50px;
+	justify-content: center;
+	align-items: center;
+	background: green;
+	border-radius: 10px 10px 0 0;
+	cursor: pointer;
+}
+.tab {
+	padding-left: 20px;
+	height: 50px;
+	min-width: 80px;
+	justify-content: center;
+	align-items: center;
+	background: rgba(200,200,150);
+	border-radius: 10px 10px 0 0;
+	cursor: pointer;
+
+}
+.tabactive {
+	display: flex;
+}
+.tabinactive {
+	display: none;
+}
+.tabbody {
+	height: 40rem;
+	width: 100%;
+	background-color: rgba(150, 240, 220);
+}
+.tabpanel {
+	height: 90%;
+	width: 90%;
+	border: solid 2px red;
+}
+.sidepanel {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	width: 50px;
+	background-color: rgba(230,200,255);
+}
+.linetab{
+	display: flex;
+	flex-direction: column;
+	min-height: 80px;
+	width: 50px;
+	border: solid black 2px;
+
+}
+.linetab:not(:hover) .linetabexpand { 
+	display: none; 
+} 
+.linetabexpand {
+	display: flex;
+	background-color: purple;
+	height: 25px;
+	width: 100%;
+}
+.linetabremove {
+	background-color: red;
+	height: 50px;
+	width: 100%;
+}
+.linetabadd {
+	background-color: green;
+	height: 50px;
+	width: 100%;
+}
 .bodywrapper {
 	display: flex;
 	flex-direction: column;
@@ -29,9 +111,10 @@ body {
 	justify-content: start;
 	align-items: center;
 	padding: 1rem;
+	height: 20rem;
+	width: 70rem;
 	background: rgb(255,255,255);
-	border-radius: 20px;
-	border-top: solid grey 1px;
+	border: solid grey 1px;
 }
 .gridwrapper {
 	display: flex;
@@ -39,6 +122,8 @@ body {
 	justify-content: start;
 	align-items: center;
 	padding: 1rem;
+	height: 90%;
+	width: 90%;
 	background: rgb(255,255,255);
 	border-radius: 20px;
 	margin-bottom: 10rem;
