@@ -264,7 +264,6 @@ agGrid.simpleHttpRequest({url: urlRead}).then(function(data) { dataStore.updateD
 	    }
 	    function initTabMenu(element) {
 	
-	    	element.setAttribute("style", "background-color: rgba(230,50,230);");
 		let buttonList = recurseChildren(element).filter(x => x.classList.contains("menubutton"));
 		for (let i = 0; i < buttonList.length; i++ ) {
 			buttonList[i].addEventListener("click", finalizeTab.bind(null, element));
