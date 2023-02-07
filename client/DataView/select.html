@@ -14,36 +14,72 @@
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 <body>
+	<script >
+	    function swapTab(tabNumber, e) {
+		let target = null;
+		let tabs = document.querySelectorAll('.tabbody');
+		for (let i = 0; i < tabs.length; i++) {
+		    if( tabs[i].dataset.tabNumber === tabNumber) { target = tabs[i] }
+		    tabs[i].classList.remove("tabactive")
+		    tabs[i].classList.add("tabinactive")
+		}
+		target.classList.remove("tabinactive");
+		target.classList.add("tabactive");
+	    }
+	    const recurseParents = (element, testFunction, store) => {
+		if (element === document.body) {
+			return;
+		} else if(testFunction(element)) {
+			store.push(element);
+			return;
+
+		} 
+		recurseParents(element.parentElement, testFunction, store);
+	    }
+	    const removeTab = (e) => {
+	    	e = e || window.event;
+	    	e.stopPropagation();
+		let returnVal = [];
+		recurseParents(e.target, (x) => 
+		{
+			console.log("classList", x.classList, " == ", x.classList.contains('tab'));
+			return (x.classList.contains('tab'));
+		}, returnVal)
+		let tab = returnVal[0];
+		let bodyID = "#body_" + tab.dataset.tabNumber;
+		let tabBody = document.querySelector(bodyID);
+		console.log("tab number", tab.dataset.tabNumber)
+		console.log("tab body", tabBody)
+
+		let nextActiveTab = tabBody.nextSibling;
+		tabBody.remove()
+		// ========================================
+		// call destructor hooks to remove
+		// any stored data relating to this tab, and remove line from uPlot
+		// =======================================
+		tab.remove();
+		if(nextActiveTab.dataset.tabNumber) {
+			swapTab(nextActiveTab.dataset.tabNumber);
+		}
+	    }
+	</script>
 	<div class="bodywrapper">
 		<div class="navbar">
-			<div x-data="{activeTitle: 'Table'}">
-				<button onclick="showChart()" style="display:flex;margin:1.5rem;" x-on:click="activeTitle = (activeTitle === 'Table') ? 'Chart' : 'Table'" x-text="activeTitle"></button>
-			</div>
 		</div>
 
 
 		<div id="work_space" class="work_space">
 			<div class="tabheader">
-				<div id="addbutton" class="tab" data-tab-number="tab0"><h3>+</h3></div>
-				<div class="tab" data-tab-number="tab1"><h3>tab 1</h3></div>
-				<div class="tab" data-tab-number="tab2"><h3>tab 2</h3></div>
-				<div class="tab" data-tab-number="tab3"><h3>tab 3</h3></div>
-			</div>
-			<div id="tabmenu" class="tabbody tabinactive" data-tab-number="tab0">
-				<button>one</button>
-				<button>two</button>
-				<button>three</button>
-				<button>four</button>
-			</div>
-			<div class="tabbody tabinactive" data-tab-number="tab1">
-			</div>
-			<div class="tabbody tabinactive" data-tab-number="tab2">
-				<div class="sidepanel">
+				<div id="addbutton" class="tab"><h6>+</h6></div>
+				<div class="showchartbutton" x-data="{activeTitle: 'Table'}">
+					<button onclick="showChart()" x-on:click="activeTitle = (activeTitle === 'Table') ? 'Chart' : 'Table'" x-text="activeTitle"></button>
 				</div>
-				<div class="tabpanel">
-					<div id="grid_panel" class="gridwrapper">
-					</div>
-				</div>
+			</div>
+			<div id="tabmenu" class="tabbody tabinactive" data-tab-number="placeholder">
+				<button class="menubutton" >one</button>
+				<button class="menubutton" >two</button>
+				<button class="menubutton" >three</button>
+				<button class="menubutton" >four</button>
 			</div>
 			<div class="tabbody tabinactive" data-tab-number="tab3">
 			</div>
@@ -53,7 +89,7 @@
 
 		<div id="chart_panel" class="chartwrapper overlaydown">
 			<div id="myChart" style="height: 100%; width:100%;"></div>
-		</div>
+	</div> 
 
 
 	</div>
@@ -63,7 +99,7 @@
 		<div class="sidepanel">
 		</div>
 		<div class="tabpanel">
-			<div id="grid_panel" class="gridwrapper">
+			<div id="grid_panel" class="gridwrapper ag-theme-alpine">
 			</div>
 		</div>
 	</div>
@@ -74,62 +110,31 @@
 		<div class="linetabadd tabinactive"></div>
 		<div class="linetabexpand"></div>
 	</div>
+
+	<div id="templatetab" class="tab" data-tab-number="tab1"><h6>New</h6><button onclick="removeTab(event)">x</button></div>
 	</div>
 
 
-	<div id="templatetab" class="tab" data-tab-number="tab1"><h3>New</h3></div>
 	<!-- templates -->
     <script type="module">
 
+
 	// ================== selecting a root =====================
-	    function initTabMenu(element) {
-	    	// hook up listeners if needed to store data / filters in the correct place
-	    	return element;
-	    }
-	    function initTabChangeHandlers(tab) {
-	    	return tab;
-	    }
-	    function addTab() {
-	    let tabData = "tab" + (Math.floor(Math.random() * (9999 - 1000) + 1000));
-	    let bodyID = "body_" + tabData;
-	    let tabID = "tab_" + tabData;
-
-	    // create and insert menu panel as a new tab body
-	    let tempBody = document.querySelector("#tabmenu");
-	    let newBody = tempBody.cloneNode(true);
-	    newBody.dataset.tabNumber = tabData;
-	    newBody.id = bodyID
-	    let readyBody = initTabMenu(newBody);
-	    tempBody.after(readyBody);
-
-	    //create and insert new tab
-	    let tempTab = document.querySelector("#templatetab");
-	    let newTab = tempTab.cloneNode(true);
-	    newTab.dataset.tabNumber = tabData;
-	    newTab.id = tabID;
-	    let readyTab = initTabHandlers(newTab);
-	    document.querySelector("#addbutton").after(readyTab);
-
-	    // set new tab as active
-	    
-
-	    //clone children of addtab
-	    //create new tab + body with matching data-tab-number
-	    //insert after addTab body, insert after addTab tab
-	    	
-	    	console.log("add tab");
-	    }
-
-	    let addButton = document.querySelector("#addbutton");
-	    addButton.addEventListener("click", addTab);
-
-	    let testingArray = document.querySelectorAll('.sidepanel');
-	    for (let i = 0; i < testingArray.length; i++) {
-	    	let tempNode = document.querySelector("#templatelinetab");
-		let newNode = tempNode.cloneNode(true);
-		let readyNode = initLineTab(newNode);
-		readyNode.id = "linetab_" + (Math.floor(Math.random() * (999 - 100) + 100));
-	    	testingArray[i].appendChild(readyNode);
+	    const recurseChildren = (htmlElement) => {
+	    console.log("htmlElement ", htmlElement);
+		if (htmlElement.children.length === 0) {
+			return [htmlElement]
+		};
+		let allChildren = [];
+		for (let i = 0; i < htmlElement.children.length; i++) {
+			console.log("recursing with ", htmlElement.children[i]);
+			let children = recurseChildren(htmlElement.children[i]);
+			if (children) {
+				allChildren.push(...children);
+			}
+		}
+		allChildren.push(htmlElement);
+		return allChildren;
 	    }
 
 	    function addLine(lineTab) {
@@ -143,17 +148,17 @@
 
 	    function initLineTab(lineTab) {
 	    	let childs = lineTab.children
-		let removeTab, addTab, expandTab;
+		let removerTab, addTab, expandTab;
 		for (let i = 0; i < childs.length; i++) {
 			if(childs[i].classList.contains("linetabremove")) {
-				removeTab = childs[i];
+				removerTab = childs[i];
 			} else if(childs[i].classList.contains("linetabadd")) {
 				addTab = childs[i];
 			} else if(childs[i].classList.contains("linetabexpand")) {
 				expandTab = childs[i];
 			}
 		}
-		removeTab.addEventListener("click", () => {
+		removerTab.addEventListener("click", () => {
 			if(lineTab.parentNode.children.length === 1) {
 				console.log('but dont');
 				return;
@@ -167,382 +172,177 @@
 		expandTab.addEventListener("click", () => {
 			if (addTab.classList.contains("tabinactive")) {
 				addTab.classList.add("tabactive")
-				removeTab.classList.add("tabactive")
+				removerTab.classList.add("tabactive")
 				addTab.classList.remove("tabinactive")
-				removeTab.classList.remove("tabinactive")
+				removerTab.classList.remove("tabinactive")
 			} else {
 				addTab.classList.add("tabinactive")
-				removeTab.classList.add("tabinactive")
+				removerTab.classList.add("tabinactive")
 				addTab.classList.remove("tabactive")
-				removeTab.classList.remove("tabactive")
+				removerTab.classList.remove("tabactive")
 			}
 		});
 		return lineTab;
 	    }
-	    
-	    function swapTab(tabNumber, e) {
-	    	
-		let target = null;
-		let tabs = document.querySelectorAll('.tabbody');
-		console.log(tabs)
-		for (let i = 0; i < tabs.length; i++) {
-			console.log(tabs[i].dataset.tabNumber)
-		    if( tabs[i].dataset.tabNumber === tabNumber) { target = tabs[i] }
-		    tabs[i].classList.remove("tabactive")
-		    tabs[i].classList.add("tabinactive")
-		}
-		target.classList.remove("tabinactive");
-		target.classList.add("tabactive");
+
+	    function finalizeTab(element, e) {
+
+		    let tempBody = document.querySelector("#templatebody");
+		    let newBody = tempBody.cloneNode(true);
+		    element.innerHTML = newBody.innerHTML;
+
+		    //=====set up side panel=========
+		    console.log("element panel", element);
+		    let sidePanel = Array.prototype.map.call(element.children, (x) => { return (x.classList.contains("sidepanel") ? x : false)}).filter(x => !!x)[0];
+		    console.log("side panel", sidePanel);
+		    let tempNode = document.querySelector("#templatelinetab");
+		    let newNode = tempNode.cloneNode(true);
+		    let readyNode = initLineTab(newNode)
+		    readyNode.id = "linetab_" + (Math.floor(Math.random() * (999 - 100) + 100));
+
+		    sidePanel.appendChild(readyNode);
+		    // ================= query database for current time period (today) ====================================================
+		    // ================= filter data for just the columns we need on the server side?
+		    // display sensor events  
+let gridwrapper = document.querySelector('.gridwrapper');
+const urlRead = 'http://localhost:8000/read/cbwTurnsTable';
+var model = [
+{ field: "time", filter: "agDateColumnFilter",
+filterParams: {
+// provide comparator function
+comparator: function(filterLocalDateAtMidnight, cellValue) {
+var dateTime = cellValue; var dateArray = dateTime.split('T'); var dateAsString = dateArray[0];
+if (dateAsString == null) {return 0;}
+// In the example application, dates are stored as dd/mm/yyyy
+// We create a Date object for comparison against the filter date
+var dateParts = dateAsString.split('-');
+var day = Number(dateParts[2]);
+var month = Number(dateParts[1]) - 1;
+var year = Number(dateParts[0]);
+var cellDate = new Date(year, month, day);
+// Now that both parameters are Date objects, we can compare
+if (cellDate < filterLocalDateAtMidnight) {return -1;} else if (cellDate > filterLocalDateAtMidnight) {
+return 1;} return 0;}}}, { field: "assetKey", filter: "agSetColumnFilter"}, { field: "exitingProductID" }, { field: "enteringProductID" }];
+
+
+let dataStore = { fullData: [], viewData: [], updateDataFunctions: [], updateViewFunctions: [], 
+updateData: function(newData) { this.fullData = newData;
+for (let i = 0; i < this.updateDataFunctions.length; i++) { this.updateDataFunctions[i](newData); }
+},
+updateView: function(newData) { this.viewData = newData;
+for (let i = 0; i < this.updateViewFunctions.length; i++) { this.updateViewFunctions[i](newData); }
+}
+}
+
+var columnDefs = model;
+
+const setRowData = (newData) => { gridOptions.api.setRowData(newData); }
+const resetView = () => { let reset = store.fullData; store.updateView(reset); }
+document.addEventListener('keydown', function(event) { if (event.ctrlKey && event.key === 'z') { resetView(); } });
+dataStore.updateDataFunctions.push(setRowData);
+const gridOptions = { rowData: dataStore.fullData, columnDefs: columnDefs, defaultColDef: { flex: 1, editable: false, },
+getRowId: (params) => { return Object.values(params.data)[0]; },
+onFilterChanged: function() {
+// ========== this needs to behave differently depending on if the filter effects the time window or not ====
+// change to time window: complete re-generation of table? 
+// change to other filters: call hooks to change saved filters, call uPlot to change displayed line data
+console.log('onFilterChanged');
+let activeRows = [];
+gridOptions.api.forEachNodeAfterFilter((node, index) => {activeRows.push(node.data)});
+setTimeout(() => dataStore.updateView(activeRows), 0);
+},
+
+};
+//----------------------------------------------------
+// lookup the container we want the Grid to use
+var eGridDiv = gridwrapper;
+// create the grid passing in the div to use together with the columns &amp; data we want to use
+new agGrid.Grid(eGridDiv, gridOptions);
+agGrid.simpleHttpRequest({url: urlRead}).then(function(data) { dataStore.updateData(data); dataStore.updateView(data); });
+		    // ================= hook up data storage, initialize agGrid, pass new hook object to uPlot, etc========================
+
 	    }
+	    function initTabMenu(element) {
+	
+	    	element.setAttribute("style", "background-color: rgba(230,50,230);");
+		let buttonList = recurseChildren(element).filter(x => x.classList.contains("menubutton"));
+		for (let i = 0; i < buttonList.length; i++ ) {
+			buttonList[i].addEventListener("click", finalizeTab.bind(null, element));
+		}
+	    	// hook up listeners if needed to store data / filters in the correct place
+	    	return element;
+	    }
+	    function initTabChangeHandlers(tab) {
+		tab.addEventListener("click", swapTab.bind(null, tab.dataset.tabNumber));
+	    	return tab;
+	    }
+	    function addTab() {
+		    let tabData = "tab" + (Math.floor(Math.random() * (9999 - 1000) + 1000));
+		    let bodyID = "body_" + tabData;
+		    let tabID = "tab_" + tabData;
+
+		    // create and insert menu panel as a new tab body
+		    let tempBody = document.querySelector("#tabmenu");
+		    let newBody = tempBody.cloneNode(true);
+		    newBody.dataset.tabNumber = tabData;
+		    newBody.id = bodyID
+		    let readyBody = initTabMenu(newBody);
+		    tempBody.after(readyBody);
+
+		    //create and insert new tab
+		    let tempTab = document.querySelector("#templatetab");
+		    let newTab = tempTab.cloneNode(true);
+		    newTab.dataset.tabNumber = tabData;
+		    newTab.id = tabID;
+		    let readyTab = initTabChangeHandlers(newTab);
+		    document.querySelector("#addbutton").after(readyTab);
+
+		    // set new tab as active
+		    swapTab(tabData);
+
+		    //clone children of addtab
+		    //create new tab + body with matching data-tab-number
+		    //insert after addTab body, insert after addTab tab
+			
+			console.log("add tab");
+	    }
+
+	    let addButton = document.querySelector("#addbutton");
+	    addButton.addEventListener("click", addTab);
+
+	    //let testingArray = document.querySelectorAll('.sidepanel');
+	    //for (let i = 0; i < testingArray.length; i++) {
+	    //	let tempNode = document.querySelector("#templatelinetab");
+	    //    let newNode = tempNode.cloneNode(true);
+	    //    let readyNode = initLineTab(newNode);
+	    //    readyNode.id = "linetab_" + (Math.floor(Math.random() * (999 - 100) + 100));
+	    //	testingArray[i].appendChild(readyNode);
+	    //}
+
+	    
 
 	    let tabs = document.querySelectorAll('.tab');
 	    for (let i = 0; i < tabs.length; i++) {
-		tabs[i].addEventListener("click", swapTab.bind(null, tabs[i].dataset.tabNumber));
+	    	if( tabs[i].dataset.tabNumber ) {
+			tabs[i].addEventListener("click", swapTab.bind(null, tabs[i].dataset.tabNumber));
+		}
 	    }
 	//article.dataset.indexNumber    
 	    // insert buttons
 	    // buttons call query with different parameters
-	    //query returns with data, stored modified before being appended to ground truth
+	    //query returns with data, modified before being appended to ground truth
 	    // create and append ag Grid, agGrid needs a 'filters' object
 
 	// ================== =====================
 
-	    import { generateTimeSeriesTable } from './js/timeSeriesTable.js';
+	   // import { generateTimeSeriesTable } from './js/timeSeriesTable.js';
 
 
-	    const urlRead = 'http://localhost:8000/read/cbwTurnsTable';
-	    var model = [
-	    {
-	    	field: "time",
-		filter: "agDateColumnFilter",
-		filterParams: {
-		    // provide comparator function
-		    comparator: function(filterLocalDateAtMidnight, cellValue) {
-		    	var dateTime = cellValue;
-			var dateArray = dateTime.split('T');
-
-		        var dateAsString = dateArray[0];
-
-		        if (dateAsString == null) {
-		    	return 0;
-		        }
-
-		        // In the example application, dates are stored as dd/mm/yyyy
-		        // We create a Date object for comparison against the filter date
-		        var dateParts = dateAsString.split('-');
-		        var day = Number(dateParts[2]);
-		        var month = Number(dateParts[1]) - 1;
-		        var year = Number(dateParts[0]);
-		        var cellDate = new Date(year, month, day);
-
-		        // Now that both parameters are Date objects, we can compare
-		        if (cellDate < filterLocalDateAtMidnight) {
-		    	return -1;
-		        } else if (cellDate > filterLocalDateAtMidnight) {
-		    	return 1;
-		        }
-		        return 0;
-		    }
-		}
-	    },
-	    {
-	    	field: "assetKey",
-		filter: "agSetColumnFilter"
-	    },
-	    {
-	    	field: "exitingProductID"
-	    },
-	    {
-	    	field: "enteringProductID"
-	    }
-	    ];
 
 
-	    let dataStore = {
-	            fullData: [],
-	            viewData: [],
-	            updateDataFunctions: [],
-	            updateViewFunctions: [],
-	            updateData: function(newData) {
-	        	    this.fullData = newData;
-	        	    for (let i = 0; i < this.updateDataFunctions.length; i++) {
-	        		this.updateDataFunctions[i](newData);
-	        	    }
-	            },
-	            updateView: function(newData) {
-	        	    this.viewData = newData;
-	        	    for (let i = 0; i < this.updateViewFunctions.length; i++) {
-	        		this.updateViewFunctions[i](newData);
-	        	    }
-	            }
-	    }
-
-	function wheelZoomPlugin(opts) {
-		//let factor = opts.factor || 0.75;
-
-
-		//function clamp(nRange, nMin, nMax, fRange, fMin, fMax) {
-		//	if (nRange > fRange) {
-		//		nMin = fMin;
-		//		nMax = fMax;
-		//	}
-		//	else if (nMin < fMin) {
-		//		nMin = fMin;
-		//		nMax = fMin + nRange;
-		//	}
-		//	else if (nMax > fMax) {
-		//		nMax = fMax;
-		//		nMin = fMax - nRange;
-		//	}
-
-		//	return [nMin, nMax];
-		//}
-
-		let xMin, xMax, yMin, yMax, xRange, yRange;
-		return {
-			hooks: {
-				ready: u => {
-					console.log('plugin[0].hooks.ready was just called with u = ', u);
-					xMin = u.scales.x.min;
-					xMax = u.scales.x.max;
-					yMin = u.scales.y.min;
-					yMax = u.scales.y.max;
-
-					xRange = xMax - xMin;
-					yRange = yMax - yMin;
-
-					let over = u.over;
-					let rect = over.getBoundingClientRect();
-
-					// wheel drag pan
-					over.addEventListener("mousedown", e => {
-						if (e.button == 1) {
-						//	plot.style.cursor = "move";
-							e.preventDefault();
-
-							let left0 = e.clientX;
-						//	let top0 = e.clientY;
-
-							let scXMin0 = u.scales.x.min;
-							let scXMax0 = u.scales.x.max;
-
-							let xUnitsPerPx = u.posToVal(1, 'x') - u.posToVal(0, 'x');
-
-							function onmove(e) {
-								e.preventDefault();
-
-								let left1 = e.clientX;
-							//	let top1 = e.clientY;
-
-								let dx = xUnitsPerPx * (left1 - left0);
-
-								u.setScale('x', {
-									min: scXMin0 - dx,
-									max: scXMax0 - dx,
-								});
-							}
-
-							function onup(e) {
-								document.removeEventListener("mousemove", onmove);
-								document.removeEventListener("mouseup", onup);
-							}
-
-							document.addEventListener("mousemove", onmove);
-							document.addEventListener("mouseup", onup);
-						}
-					});
-
-				}
-			}
-		};
-	}
-
-	let uChart;
-	function makeChart(data) {
-		
-		const { linear, stepped, bars, spline, spline2 } = uPlot.paths;
-		console.log('uPlot.paths constants: ', linear, stepped, bars, spline, spline2);
-		const lineInterpolations = {
-				linear:     0,
-				stepAfter:  1,
-				stepBefore: 2,
-				spline:     3,
-			//	spline2:    4,
-			};
-
-			const drawStyles = {
-				line:      0,
-				bars:      1,
-				points:    2,
-				barsLeft:  3,
-				barsRight: 4,
-			};
-
-			// generate bar builder with 60% bar (40% gap) & 100px max bar width
-			const _bars60_100   = bars({size: [0.6, 100]});
-			const _bars100Left  = bars({size: [1], align:  1});
-			const _bars100Right = bars({size: [1], align: -1});
-			const _stepBefore   = stepped({align: -1}); //, ascDesc: true
-			const _stepAfter    = stepped({align:  1}); //, ascDesc: true
-			const _linear       = linear();
-			const _spline       = spline();
-		//	const _spline2      = spline2();
-
-			function paths(u, seriesIdx, idx0, idx1, extendGap, buildClip) {
-				let s = u.series[seriesIdx];
-				let style = s.drawStyle;
-				let interp = s.lineInterpolation;
-
-				let renderer = (
-					style == drawStyles.line ? (
-						interp == lineInterpolations.linear     ? _linear :
-						interp == lineInterpolations.stepAfter  ? _stepAfter :
-						interp == lineInterpolations.stepBefore ? _stepBefore :
-						interp == lineInterpolations.spline     ? _spline :
-					//	interp == lineInterpolations.spline2    ? _spline2 :
-						null
-					) :
-					style == drawStyles.bars ? (
-						_bars60_100
-					) :
-					style == drawStyles.barsLeft ? (
-						_bars100Left
-					) :
-					style == drawStyles.barsRight ? (
-						_bars100Right
-					) :
-					style == drawStyles.points ? (
-						() => null
-					) : () => null
-				);
-
-				return renderer(u, seriesIdx, idx0, idx1, extendGap, buildClip);
-			}
-		console.time('chart');
-
-		let opts = {
-			title: "Click & Drag to Zoom",
-			tzDate: ts => uPlot.tzDate(new Date(ts * 1e3), 'Etc/UTC'),
-			tz: 'Etc/UTC',
-			width: 1200,
-			height: 800,
-			plugins: [
-				wheelZoomPlugin({factor: 0.75})
-			],
-			scales: {
-			//	x: {
-			//		time: false,
-			//	},
-			//	y: {
-			//		auto: false,
-			//	}
-			},
-			series: [
-				{},
-				{
-					drawStyle:         3,
-					lineInterpolation: null,
-					stroke:            "red",
-					fill:              "pink",
-					label: "Y",
-					paths,
-				},
-			],
-			axes: [
-			{
-			space: 100,
-			},
-			{
-			space: 20
-			}
-			]
-		};
-
-
-		let chartElement = document.getElementById('myChart');
-		uChart = new uPlot(opts, data, chartElement);
-
-		console.timeEnd('chart');
-	}
-
-	const data = [
-		[],
-		[],
-		[],
-	];
-	makeChart(data);
 	
 	// ================== agGrid code
-	
-	const p = (newData, currentChart = uChart) => {
-	//	console.log('updated data', newData);
-		let timeStrings = newData.map((obj) => { return obj.time });
-		let timeStamps = timeStrings.map((s) => { 
-			let d = new Date(s);
-			return Math.floor(d.getTime() / 1000);
-		});
-
-		let stepSize = {
-			"min": 60,
-			"hour": 3600,
-			"day": 86400,
-			"week": 604800,
-		};
-
-		let min = timeStamps[0] * 1000;
-		//console.log('min', min);
-		let rounded = new Date(min);
-		//console.log('rounded', rounded);
-		rounded.setMinutes(0,0,0);
-		min = rounded.getTime() / 1000;
-		//console.log('rounded min', min);
-
-		let max = timeStamps[timeStamps.length -1];
-		//console.log('max', max);
-	    	let step = stepSize["hour"];
-		let ticks = [];
-		let boundary = min;
-		while (boundary < (max+step)) {
-	    		ticks.push(boundary);
-	    		boundary += step;
-	        }
-	    	//console.log('last boundary', boundary);
-	    	//console.log('last timestamp', timeStamps[timeStamps.length -1]);
-	    	//console.log('last timestamp + step', timeStamps[timeStamps.length -1] + step);
-		//console.log('ticks ', ticks);
-
-		let countIndex = 0;
-		let counts = Array(ticks.length).fill(0);
-
-	    	let i = 0;
-		while ( (i < timeStamps.length) && (countIndex < counts.length)) {
-			//console.log('timestamps[i], ticks[coutnIndex + 1]', timeStamps[i], ", ", ticks[countIndex+1]);
-			//console.log('i, countIndex', i, ", ", countIndex);
-	    		if(ticks[countIndex+1] === 'undefined') { break; }
-	    		if(ticks[countIndex+1] == 'undefined') { break; }
-	    		if(ticks[countIndex+1] == undefined) { break; }
-	    		if(ticks[countIndex+1] === undefined) { break; }
-			if (timeStamps[i] < ticks[countIndex+1]) {
-				//console.log(timeStamps[i] + " < time, countIndex > " + countIndex + " ticks[countIndex + 1] = " + ticks[countIndex +1]);
-				counts[countIndex] += 1;
-	    			i ++;
-			} else {
-				countIndex ++;
-			}
-		}
-
-		//let outputArray = counts.filter((x) => { return (x > 0)});
-		let outputArray = counts;
-
-		const testdata = [
-			ticks,
-			outputArray,
-		];
-		//console.log('testdata', testdata);
-		setTimeout(() => currentChart.setData(testdata), 0)
-	}
-	dataStore.updateViewFunctions.push(p);
-	//document.addEventListener('DOMContentLoaded', generateTimeSeriesTable(model, urlRead, dataStore));
+	 //document.addEventListener('DOMContentLoaded', generateTimeSeriesTable(model, urlRead, dataStore));
 	// ================== agGrid code
 
 </script>
