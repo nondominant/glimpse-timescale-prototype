@@ -19,6 +19,9 @@ h1, h2, h3, h4, h5, h6 {
 	padding-left: 0.5rem;
 	padding-right: 0.5rem;
 }
+.data {
+	display: none;
+}
 .showchartbutton {
 	display: flex;
 	margin-left: auto;
@@ -35,8 +38,8 @@ h1, h2, h3, h4, h5, h6 {
 	display: flex;
 	flex-direction: column;
 	background: rgba(240,240,240);
-	min-height: 40rem;
-	width: 80%;
+	min-height: 90vh;
+	width: 90vw;
 }
 .tabheader {
 	display: flex;
@@ -86,7 +89,7 @@ h1, h2, h3, h4, h5, h6 {
 	display: none;
 }
 .tabbody {
-	min-height: 40rem;
+	height: 100%;
 	width: 100%;
 }
 .tabpanel {
@@ -101,42 +104,155 @@ h1, h2, h3, h4, h5, h6 {
 .sidepanel {
 	display: flex;
 	flex-direction: column;
+	align-items: center;
 	height: 100%;
 	width: auto;
 	background-color: white;
 	border: solid grey 1px;
 }
-.linetab{
+.sidepanel p {
+	font-family: sans-serif;
+	font-size: 12px;
+	font-weight: 500;
+	padding: 1rem;
+	white-space: nowrap;
+}
+.line_tab{
+	position: relative;
+	font-family: sans-serif;
+	font-weight: 400;
 	display: flex;
-	flex-direction: row;
-	justify-content: start;
-	min-width: 2rem;
-	height: 2rem;
-	margin: 3px;
-	box-shadow: rgba(0, 0, 0, 0.16) 0px 3px 6px inset, rgba(0, 0, 0, 0.23) 0px 3px 6px inset;
+	margin: 2px;
+	margin-bottom: 6px;
+	background-color: rgb(234, 241, 251);
+	width: 4rem;
+	min-height: 2rem;
+	border-radius: 3px;
+	border: solid transparent 1px;
 
 }
-.linetab:hover{
-	box-shadow: rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px;
+.line_tab:hover {
+	border: solid rgba(33, 150, 243) 1px;
 }
-.linetab:not(:hover) .linetabexpand { 
-	display: none; 
+.line_tab::after {
+	content: '';
+	display: flex;
+	justify-content: center;
+	position: absolute;
+	top: 0%;
+	left: 90%;
+	height: 80%;
+	width: 0;
+	font-size: 12px;
+	background-color: #2b222a;
+	color: white;
+	pointer-events: none;
+	border-radius: 4px;
+}
+.line_tab:hover::after {
+	content: attr(data-enabled);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	position: absolute;
+	top: -50%;
+	left: 90%;
+	height: 80%;
+	font-size: 12px;
+	width: 3rem;
+	background-color: #2b222a;
+	color: white;
+	pointer-events: none;
+	transition: all 0.2s ease;
+	border-radius: 4px;
+}
+.line_tab:not(:hover) .line_tabremove { 
 } 
-.linetabexpand {
+.line_tab[data-enabled="on"] {
+	background-color: rgba(232, 244, 254);
+}
+.line_tab[data-enabled="off"] {
+	background-color: rgba(248, 248, 248);
+	box-shadow: rgba(0, 0, 0, 0.1) 0px 1px 3px 0px inset, rgba(0, 0, 0, 0.06) 0px 1px 2px 0px inset;
+}
+.line_tab[data-active="true"] {
+	border: solid rgba(33, 150, 243) 1px;
+}
+.line_tab[data-active="false"] {
+	border: solid transparent 1px;
+}
+.line_tabenable {
+	display: flex;
+	width: 60%;
+	height: 100%;
+}
+.line_tabremove {
+	position: relative;
+	display: flex;
+	width: 40%;
+	height: 100%;
+}
+.line_tabremove:hover::before {
+	content:'\274C  ';
+	font-size: 12px;
+	margin: auto;
+}
+#addbutton::before {
+	content:'\002B';
+}
+.line_tabexpand {
 	display: flex;
 	background-color: rgba(200,200,200,0.5);
 	width: 1rem;
 	height: 100%;
 }
-.linetabremove {
-	background-color: red;
-	width: 2rem;
+.line_tabadd {
+	display: flex;
+	margin: 2px;
+	background-color: rgba(232, 244, 254);
+	width: 4rem;
 	min-height: 2rem;
+	border-radius: 3px;
 }
-.linetabadd {
-	background-color: green;
-	width: 2rem;
-	min-height: 2rem;
+.line_tabadd::before{
+	content:'\002B';
+	margin: auto;
+	color: '#f00';
+	background-color: '#f00';
+}
+.line_tabadd:hover {
+	box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
+	
+}
+.new_tab_menu {
+	display: flex;
+	justify-content: start;
+	align-items: start;
+	flex: 0 1 1;
+	width: 100%;
+	background-image: linear-gradient(to right top, #490367, #510084, #5300a4, #4d02c6, #3712eb);
+	padding: 3rem;
+}
+.menubutton {
+	display: flex;
+	height: 3rem;
+	min-width: 5rem;
+	margin: 2rem;
+	justify-content: center;
+	align-items: center;
+	font-size: 16px;
+	font-weight: 900;
+	color: white;
+	background-color: black;
+	border: solid transparent 2px;
+
+}
+.menubutton:hover {
+	background-color: rgba(0,0,0,0.9);
+	border-radius: 6px;
+	border: solid white 2px;
+	transition: all 0.5s ease;
+
 }
 .bodywrapper {
 	display: flex;
@@ -145,6 +261,7 @@ h1, h2, h3, h4, h5, h6 {
 	align-items: center;
 	width: 100vw;
 	height: 200vh;
+	padding-top: 5vh;
 	background: rgb(255,255,255);
 	background: linear-gradient(213deg, rgba(255,255,255,1) 20%, rgba(7,210,245,0.9738095921962535) 100%); 
 }
