@@ -45,6 +45,7 @@
 			return (x.classList.contains('tab'));
 		}, returnVal)
 		let tab = returnVal[0];
+		//TODO make more robust by adding "get body id", "get tab id" functions
 		let bodyID = "#body_" + tab.dataset.tabNumber;
 		let tabBody = document.querySelector(bodyID);
 
@@ -55,6 +56,7 @@
 		// any stored data relating to this tab, and remove line from uPlot
 		// =======================================
 		tab.remove();
+		delete gridHandles[tab.dataset.tabNumber];
 		if(nextActiveTab.dataset.tabNumber) {
 			swapTab(nextActiveTab.dataset.tabNumber);
 		}
@@ -120,6 +122,8 @@
 	// ================= setting up objects to propogate state between agGrid and uPlot ================
 	    let allTabDataStores = {};
 	    let chartDataStore = {};
+	    let gridHandles = {};
+
 
 	    //TODO let uChart = new uPlot(opts, data, chartElement);
 
@@ -186,8 +190,6 @@
 			//set as active tab first, if active invert enabled
 			if(allTabDataStores[parentNode.dataset.tabNumber]["activeLine"] === lineTab.id) {
 				lineTab.dataset.enabled = lineTab.dataset.enabled === "on" ? "off" : "on"; 
-				console.log("parent Node", parentNode);
-				console.log("all tab data stores", allTabDataStores);
 			} else { 
 				allTabDataStores[parentNode.dataset.tabNumber]["activeLine"] = lineTab.id;
 				// set all other lines to disabled
@@ -206,10 +208,12 @@
 						console.log("error with currentLine.dataset.active ", lines[k]);
 					}
 				}
-
 				lineTab.dataset.active = "true"; 
+				let currentGrid = gridHandles[parentNode.dataset.tabNumber];
+				//set filters to the active line filters
+				let filters = allTabDataStores[parentNode.dataset.tabNumber]["filters"][lineTab.id];
+				currentGrid.gridOptions.api.setFilterModel(filters);
 			}
-			//TODO call agGrid and set data with new filters
 		});
 	    	let childs = lineTab.children
 		let removerTab;
@@ -228,7 +232,6 @@
 				console.log(e);
 				return;
 			}
-			// TODO remove line from allTabDataStores[this tab][filters][line to remove] (first implement logic to add it to filters when it's created)
 			delete allTabDataStores[parentNode.dataset.tabNumber]["filters"][lineTab.id];
 			delete chartDataStore[parentNode.dataset.tabNumber][lineTab.id];
 			lineTab.remove();
@@ -257,7 +260,8 @@
 		    let tabDataStore = {
 		    	activeLine : '',
 			filters : {},
-			tab : element.id,
+			tabID : element.id,
+			tabNumber: element.dataset.tabNumber,
 			groundTruth: [],
 		    };
 		    allTabDataStores[element.dataset.tabNumber] = tabDataStore;
@@ -305,9 +309,11 @@ onFilterChanged: function() {
 // ========== this needs to behave differently depending on if the filter effects the time window or not ====
 // change to time window: complete re-generation of table? 
 // change to other filters: call hooks to change saved filters, call uPlot to change displayed line data
-console.log('onFilterChanged');
-console.log('test data', chartDataStore);
+
+let newFilters = gridOptions.api.getFilterModel();
 // external hook to update data after filter
+let activeLine = tabDataStore["activeLine"];
+tabDataStore["filters"][activeLine] = newFilters;
 let activeRows = [];
 gridOptions.api.forEachNodeAfterFilter((node, index) => {activeRows.push(node.data)});
 setTimeout(() => dataStore.updateView(activeRows), 0);
@@ -318,7 +324,7 @@ setTimeout(() => dataStore.updateView(activeRows), 0);
 // lookup the container we want the Grid to use
 var eGridDiv = gridwrapper;
 // create the grid passing in the div to use together with the columns &amp; data we want to use
-new agGrid.Grid(eGridDiv, gridOptions);
+gridHandles[element.dataset.tabNumber] = new agGrid.Grid(eGridDiv, gridOptions);
 agGrid.simpleHttpRequest({url: urlRead}).then(function(data) { dataStore.updateData(data); dataStore.updateView(data); });
 		    // ================= hook up data storage, initialize agGrid, pass new hook object to uPlot, etc========================
 
