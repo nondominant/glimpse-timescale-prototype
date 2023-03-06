@@ -72,95 +72,101 @@ RUN touch /home/admin/start.sh \
 
 
 
-&& echo "CREATE TABLE IF NOT EXISTS           \
-cbwTurnsTable (                               \
-time TIMESTAMP NOT NULL,                      \
-assetKey INTEGER NOT NULL, 	              \
-exitingProductID INTEGER NOT NULL,	      \
-enteringProductID INTEGER NOT NULL,	      \
-PRIMARY KEY(time, assetKey) 	              \
-);" >> /home/admin/create_database.sql        \
-&& echo "CREATE TABLE IF NOT EXISTS           \
-eventSourceTable (                            \
-macAddress VARCHAR (25) NOT NULL,	      \
-eventSourceID INTEGER NOT NULL, 	      \
-assetKey INTEGER NOT NULL, 	              \
-weightedSum FLOAT4 NOT NULL,                  \
-PRIMARY KEY(macAddress) 	              \
-);" >> /home/admin/create_database.sql        \
-&& echo "CREATE TABLE IF NOT EXISTS           \
-sensorEventTable (                            \
-time TIMESTAMP NOT NULL,                      \
-eventSourceID INTEGER NOT NULL, 	      \
-assetKey INTEGER NOT NULL, 	              \
-employeeID INTEGER NOT NULL, 	              \
-weightedSum FLOAT4 NOT NULL, 	              \
-productID INTEGER NOT NULL, 	              \
-PRIMARY KEY(time, eventSourceID) 	      \
-);" >> /home/admin/create_database.sql        \
-&& echo "CREATE TABLE IF NOT EXISTS           \
-coachingMomentTable (                         \
-time TIMESTAMP NOT NULL,                      \
-employeeID INTEGER NOT NULL, 	              \
-managerID INTEGER NOT NULL, 	              \
-note VARCHAR (300) NOT NULL, 	              \
-PRIMARY KEY(time, employeeID) 	              \
-);" >> /home/admin/create_database.sql        \
-&& echo "CREATE TABLE IF NOT EXISTS           \
-productTable (                                \
-productID INTEGER NOT NULL, 	              \
-productName VARCHAR (50) NOT NULL, 	      \
-weight FLOAT4 NOT NULL, 	              \
-PRIMARY KEY(productID) 	                      \
-);" >> /home/admin/create_database.sql        \
-&& echo "CREATE TABLE IF NOT EXISTS           \
-machineStatusTable (                          \
-assetKey INTEGER NOT NULL, 	              \
-time TIMESTAMP NOT NULL,                      \
-status VARCHAR (30) NOT NULL, 	              \
-productID INTEGER NOT NULL, 	              \
-PRIMARY KEY(assetKey, time) 	              \
-);" >> /home/admin/create_database.sql        \
-&& echo "CREATE TABLE IF NOT EXISTS           \
-resourceUsageTable (                          \
-meterID INTEGER NOT NULL, 	              \
-time TIMESTAMP NOT NULL,                      \
-usageIncrement FLOAT4 NOT NULL, 	      \
-unit VARCHAR (10) NOT NULL, 	              \
-type VARCHAR (30) NOT NULL,  	              \
-assetKey INTEGER NOT NULL, 	              \
-PRIMARY KEY(meterID, time) 	              \
-);" >> /home/admin/create_database.sql        \
-&& echo "CREATE TABLE IF NOT EXISTS           \
-meterTable (                                  \
-meterID INTEGER NOT NULL, 	              \
-usageIncrement FLOAT4 NOT NULL, 	      \
-unit VARCHAR (10) NOT NULL, 	              \
-type VARCHAR (30) NOT NULL,  	              \
-assetKey INTEGER NOT NULL, 	              \
-PRIMARY KEY(meterID) 	                      \
-);" >> /home/admin/create_database.sql        \
-&& echo "CREATE TABLE IF NOT EXISTS           \
-assetTable (                                  \
-assetKey INTEGER NOT NULL, 	              \
-assetName VARCHAR (50) NOT NULL, 	      \
-status VARCHAR (50) NOT NULL, 	              \
-PRIMARY KEY(assetKey) 	                      \
-);" >> /home/admin/create_database.sql        \
-&& echo "CREATE TABLE IF NOT EXISTS           \
-employeeTable (                               \
-employeeID INTEGER NOT NULL, 	              \
-employeeName VARCHAR (50) NOT NULL, 	      \
-PRIMARY KEY(employeeID) 	              \
-);" >> /home/admin/create_database.sql        \
-&& echo "CREATE TABLE IF NOT EXISTS           \
-locationTable (                               \
-time TIMESTAMP NOT NULL,                      \
-employeeID INTEGER NOT NULL, 	              \
-assetKey INTEGER NOT NULL, 	              \
-productID INTEGER, 	                      \
-PRIMARY KEY(time, employeeID) 	              \
-);" >> /home/admin/create_database.sql        \
+&& echo "CREATE TABLE IF NOT EXISTS           			\
+cbwTurnsTable (                               			\
+id INTEGER NOT NULL AUTO_INCREMENT,           			\
+time TIMESTAMP NOT NULL,                      			\
+assetID INTEGER NOT NULL, 	              			\
+exitingProductID INTEGER,	              			\
+enteringProductID INTEGER,	              			\
+PRIMARY KEY(id) 	                      			\
+) AUTO_INCREMENT=1;" >> /home/admin/create_database.sql        			\
+&& echo "CREATE TABLE IF NOT EXISTS           			\
+eventSourceTable (                            			\
+id INTEGER NOT NULL AUTO_INCREMENT, 	      			\
+macAddress VARCHAR (25) NOT NULL,	      			\
+assetID INTEGER NOT NULL, 	              			\
+weightedSum FLOAT4 NOT NULL,                  			\
+PRIMARY KEY(id) 	              			\
+) AUTO_INCREMENT=1;" >> /home/admin/create_database.sql        			\
+&& echo "CREATE TABLE IF NOT EXISTS           			\
+sensorEventTable (                            			\
+id INTEGER NOT NULL AUTO_INCREMENT,			\
+time TIMESTAMP NOT NULL,                      			\
+eventSourceID INTEGER NOT NULL, 	      			\
+assetID INTEGER NOT NULL, 	              			\
+employeeID INTEGER NOT NULL, 	              			\
+weightedSum FLOAT4 NOT NULL, 	              			\
+productID INTEGER NOT NULL, 	              			\
+PRIMARY KEY(id) 	      			\
+) AUTO_INCREMENT=1;" >> /home/admin/create_database.sql        			\
+&& echo "CREATE TABLE IF NOT EXISTS           			\
+coachingMomentTable (                         			\
+id INTEGER NOT NULL AUTO_INCREMENT,			\
+time TIMESTAMP NOT NULL,                      			\
+employeeID INTEGER NOT NULL, 	              			\
+managerID INTEGER NOT NULL, 	              			\
+note VARCHAR (300) NOT NULL, 	              			\
+PRIMARY KEY(id) 	              			\
+) AUTO_INCREMENT=1;" >> /home/admin/create_database.sql        			\
+&& echo "CREATE TABLE IF NOT EXISTS           			\
+productTable (                                			\
+id INTEGER NOT NULL AUTO_INCREMENT, 	              			\
+productName VARCHAR (50) NOT NULL, 	      			\
+weight FLOAT4 NOT NULL, 	              			\
+PRIMARY KEY(id) 	                      			\
+) AUTO_INCREMENT=1;" >> /home/admin/create_database.sql        			\
+&& echo "CREATE TABLE IF NOT EXISTS           			\
+machineStatusTable (                          			\
+id INTEGER NOT NULL AUTO_INCREMENT,			\
+assetID INTEGER NOT NULL, 	              			\
+time TIMESTAMP NOT NULL,                      			\
+status VARCHAR (30) NOT NULL, 	              			\
+productID INTEGER NOT NULL, 	              			\
+PRIMARY KEY(id) 	              			\
+) AUTO_INCREMENT=1;" >> /home/admin/create_database.sql        			\
+&& echo "CREATE TABLE IF NOT EXISTS           			\
+resourceUsageTable (                          			\
+id INTEGER NOT NULL AUTO_INCREMENT,			\
+meterID INTEGER NOT NULL, 	              			\
+time TIMESTAMP NOT NULL,                      			\
+usageIncrement FLOAT4 NOT NULL, 	      			\
+unit VARCHAR (10) NOT NULL, 	              			\
+type VARCHAR (30) NOT NULL,  	              			\
+assetID INTEGER NOT NULL, 	              			\
+PRIMARY KEY(id) 	              			\
+) AUTO_INCREMENT=1;" >> /home/admin/create_database.sql        			\
+&& echo "CREATE TABLE IF NOT EXISTS           			\
+meterTable (                                  			\
+id INTEGER NOT NULL AUTO_INCREMENT, 	              			\
+usageIncrement FLOAT4 NOT NULL, 	      			\
+unit VARCHAR (10) NOT NULL, 	              			\
+type VARCHAR (30) NOT NULL,  	              			\
+assetID INTEGER NOT NULL, 	              			\
+PRIMARY KEY(id) 	                      			\
+) AUTO_INCREMENT=1;" >> /home/admin/create_database.sql        			\
+&& echo "CREATE TABLE IF NOT EXISTS           			\
+assetTable (                                  			\
+id INTEGER NOT NULL AUTO_INCREMENT, 	              			\
+assetName VARCHAR (50) NOT NULL, 	      			\
+status VARCHAR (50) NOT NULL, 	              			\
+PRIMARY KEY(id) 	                      			\
+) AUTO_INCREMENT=1;" >> /home/admin/create_database.sql        			\
+&& echo "CREATE TABLE IF NOT EXISTS           			\
+employeeTable (                               			\
+id INTEGER NOT NULL AUTO_INCREMENT, 	              			\
+employeeName VARCHAR (50) NOT NULL, 	      			\
+PRIMARY KEY(id) 	              			\
+) AUTO_INCREMENT=1;" >> /home/admin/create_database.sql        			\
+&& echo "CREATE TABLE IF NOT EXISTS           			\
+locationTable (                               			\
+id INTEGER NOT NULL AUTO_INCREMENT,			\
+time TIMESTAMP NOT NULL,                      			\
+employeeID INTEGER NOT NULL, 	              			\
+assetID INTEGER NOT NULL, 	              			\
+productID INTEGER, 	                      			\
+PRIMARY KEY(id) 	              			\
+) AUTO_INCREMENT=1;" >> /home/admin/create_database.sql        			\
 && touch /home/admin/init.sh \
 && chmod +x /home/admin/init.sh \
 && echo "#!/bin/bash" > /home/admin/init.sh \
