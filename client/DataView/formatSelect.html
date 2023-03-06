@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Basic Example</title>
+    <link rel="stylesheet" href="style/datepickerstyle.css"/>
+    <link rel="stylesheet" href="style/style.css"/>
+    <!--
+	    <script src="https://unpkg.com/ag-grid-community/dist/ag-grid-community.min.js"></script>
+    -->
+    <script src="js/agGrid.js"></script>
+    <link rel="stylesheet" href="style/uPlot.min.css">
+    <script src="js/uPlotLib.js"></script>
+    <script src="js/utils.js"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</head>
+<body>
+	<script >
+	    function swapTab(tabNumber, e) {
+		let target = null;
+		let tabs = document.querySelectorAll('.tabbody');
+		for (let i = 0; i < tabs.length; i++) {
+		    if( tabs[i].dataset.tabNumber === tabNumber) { target = tabs[i] }
+		    tabs[i].classList.remove("tabactive")
+		    tabs[i].classList.add("tabinactive")
+		}
+		target.classList.remove("tabinactive");
+		target.classList.add("tabactive");
+	    }
+	    const recurseParents = (element, testFunction, store) => {
+		if (element === document.body) {
+			return;
+		} else if(testFunction(element)) {
+			store.push(element);
+			return;
+
+		} 
+		recurseParents(element.parentElement, testFunction, store);
+	    }
+	    const removeTab = (e) => {
+	    	e = e || window.event;
+	    	e.stopPropagation();
+		let returnVal = [];
+		recurseParents(e.target, (x) => 
+		{
+			return (x.classList.contains('tab'));
+		}, returnVal)
+		let tab = returnVal[0];
+		//TODO make more robust by adding "get body id", "get tab id" functions
+		let bodyID = "#body_" + tab.dataset.tabNumber;
+		let tabBody = document.querySelector(bodyID);
+
+		let nextActiveTab = tabBody.nextSibling;
+		tabBody.remove()
+		// ========================================
+		// call destructor hooks to remove
+		// any stored data relating to this tab, and remove line from uPlot
+		// =======================================
+		tab.remove();
+		delete gridHandles[tab.dataset.tabNumber];
+		if(nextActiveTab.dataset.tabNumber) {
+			swapTab(nextActiveTab.dataset.tabNumber);
+		}
+	    }
+	</script>
+	<div class="bodywrapper">
+
+		<div id="work_space" class="work_space">
+			<div class="tabheader">
+				<div id="addbutton" class="tab"></div>
+				<div class="showchartbutton" x-data="{activeTitle: 'Table'}">
+					<button onclick="showChart()" x-on:click="activeTitle = (activeTitle === 'Table') ? 'Chart' : 'Table'" x-text="activeTitle"></button>
+				</div>
+			</div>
+			<div id="tabmenu" class="tabbody tabinactive" data-tab-number="placeholder">
+				<div class="new_tab_menu">
+					<button class="menubutton" >Pieces</button>
+					<button class="menubutton" >Hours</button>
+					<button class="menubutton" >Pieces per Hour</button>
+					<button class="menubutton" >Resource Usage</button>
+				</div>
+			</div>
+			<div class="tabbody tabinactive" data-tab-number="tab3">
+			</div>
+		</div>
+
+
+
+		<div id="chart_panel" class="chartwrapper overlaydown">
+			<div id="myChart" style="height: 100%; width:100%;"></div>
+	</div> 
+
+
+	</div>
+	<!-- templates -->
+	<div style="visibility: hidden;">
+	<div id="templatebody" class="tabbody tabinactive" data-tab-number="tab1">
+		<div class="sidepanel">
+			<p>Graph Lines</p>
+			<div class="line_tabadd"></div>
+		</div>
+		<div class="tabpanel">
+			<div id="grid_panel" class="gridwrapper ag-theme-alpine">
+			</div>
+		</div>
+	</div>
+
+	
+	<div id="templateline_tab" class="line_tab" data-enabled="on" data-active="false">
+		<div class="line_tabremove tabactive"></div>
+		<div class="line_tabenable"></div>
+	</div>
+
+	
+
+
+	<div id="templatetab" class="tab" data-tab-number="tab1"><h6>New</h6><button onclick="removeTab(event)">x</button></div>
+	</div>
+
+
+	<!-- templates -->
+    <script type="module">
+	// ================= setting up objects to propogate state between agGrid and uPlot ================
+	    let allTabDataStores = {};
+	    let chartDataStore = {};
+	    let gridHandles = {};
+
+
+	    //TODO let uChart = new uPlot(opts, data, chartElement);
+
+	    function updateChartHook(event, tab, line, data) {
+	    	let formattedData = data;
+	    	if(event === "update" || event === "create") {
+			chartDataStore[tab][line] = formattedData;
+		}
+		let chartLines = [];
+		let tabs = Object.keys(chartDataStore);
+		for (let i = 0; i < tabs.length; i++) {
+			let lines = Object.keys(chartDataStore[tabs[i]]);
+			for(let k = 0; k < lines.length; k++) {
+				chartLines.push(chartDataStore[tabs[i]][lines[k]]);
+			}
+		}
+		//TODO uChart.setData(chartLines);
+	    }
+	    
+	// ================================================================================================
+
+
+	// ================== selecting a root =====================
+	    const recurseChildren = (htmlElement) => {
+		if (htmlElement.children.length === 0) {
+			return [htmlElement]
+		};
+		let allChildren = [];
+		for (let i = 0; i < htmlElement.children.length; i++) {
+			let children = recurseChildren(htmlElement.children[i]);
+			if (children) {
+				allChildren.push(...children);
+			}
+		}
+		allChildren.push(htmlElement);
+		return allChildren;
+	    }
+
+	    function addLine() {
+	    	let tempNode = document.querySelector("#templateline_tab");
+		let newNode = tempNode.cloneNode(true);
+		newNode.id = "line_tab_" + (Math.floor(Math.random() * (999 - 100) + 100));
+		let readyNode = initLineTab(newNode);
+		// insert new line data in global filters object
+		// TODO modify the below line to be more robust (use a parent search function to find tabNumber)
+		let tabNumber = this.parentNode.parentNode.dataset.tabNumber;
+		if (chartDataStore[tabNumber]) {
+			chartDataStore[tabNumber][readyNode.id] = [[],[]];
+		} else {
+			chartDataStore[tabNumber] = {};
+			chartDataStore[tabNumber][readyNode.id] = [[],[]];
+		}
+		allTabDataStores[tabNumber]["filters"][readyNode.id] = {};
+
+		// insert 'readyNode' before 'this', where 'this' = the button to add new lines
+		this.parentNode.insertBefore(readyNode, this);
+		//insertAfter
+	    }
+
+	    function initLineTab(lineTab) {
+		lineTab.addEventListener("click", (e) => { 
+			//TODO make parent search more robust
+			let parentNode = lineTab.parentNode.parentNode;
+			//set as active tab first, if active invert enabled
+			if(allTabDataStores[parentNode.dataset.tabNumber]["activeLine"] === lineTab.id) {
+				lineTab.dataset.enabled = lineTab.dataset.enabled === "on" ? "off" : "on"; 
+			} else { 
+				allTabDataStores[parentNode.dataset.tabNumber]["activeLine"] = lineTab.id;
+				// set all other lines to disabled
+				let currentLine = null;
+				let tabs = Object.keys(chartDataStore);
+				let lines = [];
+				for (let i = 0; i < tabs.length; i++) {
+					let longerArray = [...lines, ...Object.keys(chartDataStore[tabs[i]])];
+					lines = longerArray;
+				}
+				for(let k = 0; k < lines.length; k++) {
+					currentLine = document.getElementById(lines[k]);
+					try {
+						currentLine.dataset.active = "false";
+					} catch {
+						console.log("error with currentLine.dataset.active ", lines[k]);
+					}
+				}
+				lineTab.dataset.active = "true"; 
+				let currentGrid = gridHandles[parentNode.dataset.tabNumber];
+				//set filters to the active line filters
+				let filters = allTabDataStores[parentNode.dataset.tabNumber]["filters"][lineTab.id];
+				currentGrid.gridOptions.api.setFilterModel(filters);
+			}
+		});
+	    	let childs = lineTab.children
+		let removerTab;
+		for (let i = 0; i < childs.length; i++) {
+			if(childs[i].classList.contains("line_tabremove")) {
+				removerTab = childs[i];
+			} 
+
+		}
+		removerTab.addEventListener("click", (e) => {
+			e = e || window.event;
+			e.stopPropagation();
+			//TODO make parent search more robust
+			let parentNode = lineTab.parentNode.parentNode;
+			if(lineTab.parentNode.children.length <= 3) {
+				console.log(e);
+				return;
+			}
+			delete allTabDataStores[parentNode.dataset.tabNumber]["filters"][lineTab.id];
+			delete chartDataStore[parentNode.dataset.tabNumber][lineTab.id];
+			lineTab.remove();
+			
+		});
+
+		return lineTab;
+
+	    }
+
+	    function finalizeTab(element, chartDataStore, e) {
+
+		    let tempBody = document.querySelector("#templatebody");
+		    let newBody = tempBody.cloneNode(true);
+		    element.innerHTML = newBody.innerHTML;
+
+		    //=====set up side panel=========
+		    let sidePanel = Array.prototype.map.call(element.children, (x) => { return (x.classList.contains("sidepanel") ? x : false)}).filter(x => !!x)[0];
+		    let addLineButton = Array.prototype.map.call(sidePanel.children, (x) => { return (x.classList.contains("line_tabadd") ? x : false)}).filter(x => !!x)[0]; 
+		    addLineButton.addEventListener("click", addLine.bind(addLineButton));
+
+		    // ================= query database for current time period (today) ====================================================
+		    // ================= filter data for just the columns we need on the server side?
+
+		    // ==================
+		    let tabDataStore = {
+		    	activeLine : '',
+			filters : {},
+			tabID : element.id,
+			tabNumber: element.dataset.tabNumber,
+			groundTruth: [],
+		    };
+		    allTabDataStores[element.dataset.tabNumber] = tabDataStore;
+		    // ==================
+		    // display sensor events  
+let gridwrapper = document.querySelector('.gridwrapper');
+const urlRead = 'http://localhost:8001/data/pieces/12022023/13022023';
+var model = [
+	{ field: "time" },
+	{ field: "assetName", filter: "agSetColumnFilter"},
+	{ field: "employeeName", filter: "agSetColumnFilter"},
+	{ field: "productName", filter: "agSetColumnFilter"}
+];
+
+
+
+let dataStore = { fullData: [], viewData: [], updateDataFunctions: [], updateViewFunctions: [], 
+updateData: function(newData) { this.fullData = newData;
+for (let i = 0; i < this.updateDataFunctions.length; i++) { this.updateDataFunctions[i](newData); }
+},
+updateView: function(newData) { this.viewData = newData;
+for (let i = 0; i < this.updateViewFunctions.length; i++) { this.updateViewFunctions[i](newData); }
+}
+}
+
+var columnDefs = model;
+
+const setRowData = (newData) => { gridOptions.api.setRowData(newData); }
+const resetView = () => { let reset = store.fullData; store.updateView(reset); }
+document.addEventListener('keydown', function(event) { if (event.ctrlKey && event.key === 'z') { resetView(); } });
+dataStore.updateDataFunctions.push(setRowData);
+const gridOptions = { rowData: dataStore.fullData, columnDefs: columnDefs, defaultColDef: { flex: 1, editable: false, },
+getRowId: (params) => { return Object.values(params.data)[0]; },
+onFilterChanged: function() {
+// ========== this needs to behave differently depending on if the filter effects the time window or not ====
+// change to time window: complete re-generation of table? 
+// change to other filters: call hooks to change saved filters, call uPlot to change displayed line data
+
+let newFilters = gridOptions.api.getFilterModel();
+// external hook to update data after filter
+let activeLine = tabDataStore["activeLine"];
+tabDataStore["filters"][activeLine] = newFilters;
+let activeRows = [];
+gridOptions.api.forEachNodeAfterFilter((node, index) => {activeRows.push(node.data)});
+setTimeout(() => dataStore.updateView(activeRows), 0);
+},
+
+};
+//----------------------------------------------------
+// lookup the container we want the Grid to use
+var eGridDiv = gridwrapper;
+// create the grid passing in the div to use together with the columns &amp; data we want to use
+gridHandles[element.dataset.tabNumber] = new agGrid.Grid(eGridDiv, gridOptions);
+agGrid.simpleHttpRequest({url: urlRead}).then(function(data) { dataStore.updateData(data); dataStore.updateView(data); });
+		    // ================= hook up data storage, initialize agGrid, pass new hook object to uPlot, etc========================
+
+}
+	    function initTabMenu(element) {
+	
+		let buttonList = recurseChildren(element).filter(x => x.classList.contains("menubutton"));
+		for (let i = 0; i < buttonList.length; i++ ) {
+			buttonList[i].addEventListener("click", finalizeTab.bind(null, element, chartDataStore));
+		}
+	    	// hook up listeners if needed to store data / filters in the correct place
+	    	return element;
+	    }
+	    function initTabChangeHandlers(tab) {
+		tab.addEventListener("click", swapTab.bind(null, tab.dataset.tabNumber));
+	    	return tab;
+	    }
+	    function addTab() {
+		    let tabData = "tab" + (Math.floor(Math.random() * (9999 - 1000) + 1000));
+		    let bodyID = "body_" + tabData;
+		    let tabID = "tab_" + tabData;
+
+		    // create and insert menu panel as a new tab body
+		    let tempBody = document.querySelector("#tabmenu");
+		    let newBody = tempBody.cloneNode(true);
+		    newBody.dataset.tabNumber = tabData;
+		    newBody.id = bodyID
+		    let readyBody = initTabMenu(newBody);
+		    tempBody.after(readyBody);
+
+		    //create and insert new tab
+		    let tempTab = document.querySelector("#templatetab");
+		    let newTab = tempTab.cloneNode(true);
+		    newTab.dataset.tabNumber = tabData;
+		    newTab.id = tabID;
+		    let readyTab = initTabChangeHandlers(newTab);
+		    document.querySelector("#addbutton").after(readyTab);
+
+		    // set new tab as active
+		    swapTab(tabData);
+
+		    //clone children of addtab
+		    //create new tab + body with matching data-tab-number
+		    //insert after addTab body, insert after addTab tab
+			
+	    }
+
+	    let addButton = document.querySelector("#addbutton");
+	    addButton.addEventListener("click", addTab);
+
+	    //let testingArray = document.querySelectorAll('.sidepanel');
+	    //for (let i = 0; i < testingArray.length; i++) {
+	    //	let tempNode = document.querySelector("#templateline_tab");
+	    //    let newNode = tempNode.cloneNode(true);
+	    //    let readyNode = initLineTab(newNode);
+	    //    readyNode.id = "line_tab_" + (Math.floor(Math.random() * (999 - 100) + 100));
+	    //	testingArray[i].appendChild(readyNode);
+	    //}
+
+	    
+
+	    let tabs = document.querySelectorAll('.tab');
+	    for (let i = 0; i < tabs.length; i++) {
+	    	if( tabs[i].dataset.tabNumber ) {
+			tabs[i].addEventListener("click", swapTab.bind(null, tabs[i].dataset.tabNumber));
+		}
+	    }
+	//article.dataset.indexNumber    
+	    // insert buttons
+	    // buttons call query with different parameters
+	    //query returns with data, modified before being appended to ground truth
+	    // create and append ag Grid, agGrid needs a 'filters' object
+
+	// ================== =====================
+
+	   // import { generateTimeSeriesTable } from './js/timeSeriesTable.js';
+
+
+
+
+	
+	// ================== agGrid code
+	 //document.addEventListener('DOMContentLoaded', generateTimeSeriesTable(model, urlRead, dataStore));
+	// ================== agGrid code
+
+</script>
+</body>
+</html>

@@ -1,0 +1,161 @@
+&& echo "CREATE TABLE IF NOT EXISTS          / 
+cbwTurnsTable (                              / 
+	time TIMESTAMP NOT NULL,             / 
+	assetKey INTEGER NOT NULL, 	     / 
+	exitingProductID INTEGER NOT NULL,   / 
+	enteringProductID INTEGER NOT NULL,  / 
+	PRIMARY KEY(time, assetKey), 	     / 
+	INDEX (assetKey),
+	INDEX (exitingProductID),
+	INDEX (enteringProductID),
+	FOREIGN KEY (assetKey)
+	REFERENCES assetTable(assetKey)
+	ON UPDATE CASCADE ON DELETE RESTRICT,/
+	FOREIGN KEY (exitingProductID)
+	REFERENCES productTable(productID)
+	ON UPDATE CASCADE ON DELETE RESTRICT,/
+	FOREIGN KEY (enteringProductID)
+	REFERENCES productTable(productID)
+	ON UPDATE CASCADE ON DELETE RESTRICT,/
+) ;" >> /home/admin/create_database.sql      / 
+&& echo "CREATE TABLE IF NOT EXISTS          / 
+eventSourceTable (                           / 
+	eventSourceID INTEGER NOT NULL,      / 
+	macAddress VARCHAR (25) NOT NULL,    / 
+	assetKey INTEGER NOT NULL, 	     / 
+	weightedSum FLOAT4 NOT NULL,         / 
+	PRIMARY KEY(eventSourceID), 	     / 
+	INDEX (assetKey),
+	FOREIGN KEY(assetKey)
+	REFERENCES assetTable(assetKey)
+	ON UPDATE CASCADE ON DELETE RESTRICT,/
+);" >> /home/admin/create_database.sql       / 
+&& echo "CREATE TABLE IF NOT EXISTS          / 
+sensorEventTable (                           / 
+	time TIMESTAMP NOT NULL,             / 
+	eventSourceID INTEGER NOT NULL,      / 
+	assetKey INTEGER NOT NULL, 	     / 
+	employeeID INTEGER NOT NULL, 	     / 
+	weightedSum FLOAT4 NOT NULL, 	     / 
+	productID INTEGER NOT NULL, 	     / 
+	PRIMARY KEY(time, eventSourceID),    /  
+	INDEX (eventSourceID),
+	INDEX (assetKey),
+	INDEX (employeeID),
+	INDEX (productID),
+	FOREIGN KEY(eventSourceID)
+	REFERENCES eventSourceTable(eventSour/e)
+	ON UPDATE CASCADE ON DELETE RESTRICT,/
+	FOREIGN KEY(employeeID)
+	REFERENCES employeeTable(employeeID)
+	ON UPDATE CASCADE ON DELETE RESTRICT,/
+	FOREIGN KEY(assetKey)
+	REFERENCES assetTable(assetKey)
+	ON UPDATE CASCADE ON DELETE RESTRICT,/
+	FOREIGN KEY(productID)
+	REFERENCES productTable(productID)
+	ON UPDATE CASCADE ON DELETE RESTRICT,/
+);" >> /home/admin/create_database.sql       / 
+&& echo "CREATE TABLE IF NOT EXISTS          / 
+coachingMomentTable (                        / 
+	time TIMESTAMP NOT NULL,             / 
+	employeeID INTEGER NOT NULL, 	     / 
+	managerID INTEGER NOT NULL, 	     / 
+	note VARCHAR (300) NOT NULL, 	     / 
+	PRIMARY KEY(time, employeeID), 	     / 
+	INDEX (employeeID),
+	INDEX (managerID),
+	FOREIGN KEY(employeeID)
+	REFERENCES employeeTable(employeeID)
+	ON UPDATE CASCADE ON DELETE RESTRICT,/
+	FOREIGN KEY(managerID)
+	REFERENCES employeeTable(employeeID)
+	ON UPDATE CASCADE ON DELETE RESTRICT,/
+);" >> /home/admin/create_database.sql       / 
+&& echo "CREATE TABLE IF NOT EXISTS          / 
+productTable (                               / 
+	productID INTEGER NOT NULL, 	     / 
+	productName VARCHAR (50) NOT NULL,   / 
+	weight FLOAT4 NOT NULL, 	     / 
+	PRIMARY KEY(productID) 	             / 
+);" >> /home/admin/create_database.sql       / 
+&& echo "CREATE TABLE IF NOT EXISTS          / 
+machineStatusTable (                         / 
+	assetKey INTEGER NOT NULL, 	     / 
+	time TIMESTAMP NOT NULL,             / 
+	status VARCHAR (30) NOT NULL, 	     / 
+	productID INTEGER NOT NULL, 	     / 
+	PRIMARY KEY(assetKey, time), 	     / 
+	INDEX (assetKey),
+	INDEX (productID),
+	FOREIGN KEY(assetKey)
+	REFERENCES assetTable(assetKey)
+	ON UPDATE CASCADE ON DELETE RESTRICT,/
+	FOREIGN KEY(productID)
+	REFERENCES productTable(productID)
+	ON UPDATE CASCADE ON DELETE RESTRICT,/
+);" >> /home/admin/create_database.sql       / 
+&& echo "CREATE TABLE IF NOT EXISTS          / 
+resourceUsageTable (                         / 
+	meterID INTEGER NOT NULL, 	     / 
+	time TIMESTAMP NOT NULL,             / 
+	usageIncrement FLOAT4 NOT NULL,      / 
+	unit VARCHAR (10) NOT NULL, 	     / 
+	type VARCHAR (30) NOT NULL,  	     / 
+	assetKey INTEGER NOT NULL, 	     / 
+	PRIMARY KEY(meterID, time), 	     / 
+	INDEX (assetKey),
+	INDEX (meterID),
+	FOREIGN KEY(assetKey)
+	REFERENCES assetTable(assetKey)
+	ON UPDATE CASCADE ON DELETE RESTRICT,/
+	FOREIGN KEY(meterID)
+	REFERENCES meterTable(meterID)
+	ON UPDATE CASCADE ON DELETE RESTRICT,/
+);" >> /home/admin/create_database.sql       / 
+&& echo "CREATE TABLE IF NOT EXISTS          / 
+meterTable (                                 / 
+	meterID INTEGER NOT NULL, 	     / 
+	usageIncrement FLOAT4 NOT NULL,      / 
+	unit VARCHAR (10) NOT NULL, 	     / 
+	type VARCHAR (30) NOT NULL,  	     / 
+	assetKey INTEGER NOT NULL, 	     / 
+	PRIMARY KEY(meterID), 	             / 
+	INDEX (assetKey),
+	FOREIGN KEY(assetKey)
+	REFERENCES assetTable(assetKey)
+	ON UPDATE CASCADE ON DELETE RESTRICT,/
+);" >> /home/admin/create_database.sql       / 
+&& echo "CREATE TABLE IF NOT EXISTS          / 
+assetTable (                                 / 
+	assetKey INTEGER NOT NULL, 	     / 
+	assetName VARCHAR (50) NOT NULL,     / 
+	status VARCHAR (50) NOT NULL, 	     / 
+	PRIMARY KEY(assetKey) 	             / 
+);" >> /home/admin/create_database.sql       / 
+&& echo "CREATE TABLE IF NOT EXISTS          / 
+employeeTable (                              / 
+	employeeID INTEGER NOT NULL, 	     / 
+	employeeName VARCHAR (50) NOT NULL,  / 
+	PRIMARY KEY(employeeID), 	     / 
+);" >> /home/admin/create_database.sql       / 
+&& echo "CREATE TABLE IF NOT EXISTS          / 
+locationTable (                              / 
+	time TIMESTAMP NOT NULL,             / 
+	employeeID INTEGER NOT NULL, 	     / 
+	assetKey INTEGER NOT NULL, 	     / 
+	productID INTEGER, 	             / 
+	PRIMARY KEY(time, employeeID), 	     / 
+	INDEX (employeeID),
+	INDEX (assetKey),
+	INDEX (productID),
+	FOREIGN KEY(employeeID)
+	REFERENCES employeeTable(employeeID)
+	ON UPDATE CASCADE ON DELETE RESTRICT,/
+	FOREIGN KEY(assetKey)
+	REFERENCES assetTable(assetKey)
+	ON UPDATE CASCADE ON DELETE RESTRICT,/
+	FOREIGN KEY(productID)
+	REFERENCES productTable(productID)
+	ON UPDATE CASCADE ON DELETE RESTRICT,/
+);" >> /home/admin/create_database.sql       /  

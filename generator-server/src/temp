@@ -33,3 +33,42 @@ isNewRecord: false
 
 }
 
+
+
+
+
+
+
+
+
+Executing (default): SELECT "sensorEventTable"."time",
+ "sensorEventTable"."eventSourceID",
+ "sensorEventTable"."assetKey",
+ "sensorEventTable"."employeeID",
+ "sensorEventTable"."weightedSum",
+ "sensorEventTable"."productID",
+ "sensorEventTable"."eventSourceTableMacAddress",
+ "sensorEventTable"."assetTableId",
+ "sensorEventTable"."employeeTableEmployeeID",
+ "sensorEventTable"."productTableProductID",
+ "eventSourceTable"."macAddress" AS "eventSourceTable.macAddress",
+ "eventSourceTable"."eventSourceID" AS "eventSourceTable.eventSourceID",
+ "eventSourceTable"."assetKey" AS "eventSourceTable.assetKey",
+ "eventSourceTable"."weightedSum" AS "eventSourceTable.weightedSum",
+ "eventSourceTable"."assetTableId" AS "eventSourceTable.assetTableId",
+ "eventSourceTable->assetTable"."id" AS "eventSourceTable.assetTable.id",
+ "eventSourceTable->assetTable"."assetKey" AS "eventSourceTable.assetTable.assetKey",
+ "eventSourceTable->assetTable"."assetName" AS "eventSourceTable.assetTable.assetName",
+ "eventSourceTable->assetTable"."status" AS "eventSourceTable.assetTable.status",
+ "eventSourceTable->assetTable->cbwTurnsTables"."time" AS "eventSourceTable.assetTable.cbwTurnsTables.time",
+ "eventSourceTable->assetTable->cbwTurnsTables"."assetKey" AS "eventSourceTable.assetTable.cbwTurnsTables.assetKey",
+ "eventSourceTable->assetTable->cbwTurnsTables"."exitingProductID" AS "eventSourceTable.assetTable.cbwTurnsTables.exitingProductID",
+ "eventSourceTable->assetTable->cbwTurnsTables"."enteringProductID" AS "eventSourceTable.assetTable.cbwTurnsTables.enteringProductID",
+ "eventSourceTable->assetTable->cbwTurnsTables"."assetTableId" AS "eventSourceTable.assetTable.cbwTurnsTables.assetTableId",
+ "eventSourceTable->assetTable->machineStatusTables"."time" AS "eventSourceTable.assetTable.machineStatusTables.time",
+ "eventSourceTable->assetTable->machineStatusTables"."assetKey" AS "eventSourceTable.assetTable.machineStatusTables.assetKey",
+ "eventSourceTable->assetTable->machineStatusTables"."status" AS "eventSourceTable.assetTable.machineStatusTables.status",
+ "eventSourceTable->assetTable->machineStatusTables"."productID" AS "eventSourceTable.assetTable.machineStatusTables.productID",
+ "eventSourceTable->assetTable->machineStatusTables"."assetTableId" AS "eventSourceTable.assetTable.machineStatusTables.assetTableId",
+ "eventSourceTable->assetTable->machineStatusTables"."productTableProductID" AS
+
