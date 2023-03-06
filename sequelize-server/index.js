@@ -32,40 +32,54 @@ const sequelize = new Sequelize(
   });
 
 let cbwTurnsTable = sequelize.define('cbwTurnsTable', {
+  id: {
+    type: Datatypes.INTEGER, 
+    primaryKey: true,
+  }
   time: {
     type: Datatypes.DATE, 
-    primaryKey: true, 
     allowNull: false
   },
-  //assetKey: {
-  //  type: Datatypes.INTEGER, 
-  //  primaryKey: true,
-  //  allowNull: false
-  //},
+  assetID: {
+    type: Datatypes.INTEGER, 
+    references: {
+	    model: assetTable,
+	    key: 'id'
+    }
+  },
   exitingProductID: {
     type: Datatypes.INTEGER,
-    allowNull: false
+    references: {
+	    model: productTable,
+	    key: 'id'
+    }
   },
   enteringProductID: {
     type: Datatypes.INTEGER,
-    allowNull: false
+    references: {
+	    model: productTable,
+	    key: 'id'
+    }
   }
 }, {timestamps: false});
 
 let eventSourceTable = sequelize.define('eventSourceTable', {
-  macAddress: {
-    type: Datatypes.TEXT, 
+  id: {
+    type: Datatypes.INTEGER, 
     primaryKey: true, 
     allowNull: false
   },
-  //eventSourceID: {
-  //  type: Datatypes.INTEGER, 
-  //  allowNull: false
-  //},
-  //assetKey: {
-  //  type: Datatypes.INTEGER,
-  //  allowNull: false
-  //},
+  macAddress: {
+    type: Datatypes.TEXT, 
+    allowNull: false
+  },
+  assetID: {
+    type: Datatypes.INTEGER,
+    references: {
+	    model: assetTable,
+	    key: 'id'
+    }
+  },
   weightedSum: {
     type: Datatypes.FLOAT,
     allowNull: false
@@ -73,61 +87,81 @@ let eventSourceTable = sequelize.define('eventSourceTable', {
 }, {timestamps: false});
 
 let sensorEventTable = sequelize.define('sensorEventTable', {
+  id: {
+    type: Datatypes.INTEGER, 
+    primaryKey: true
+  },
   time: {
     type: Datatypes.DATE, 
-    primaryKey: true, 
     allowNull: false
   },
-  //eventSourceID: {
-  //  type: Datatypes.INTEGER, 
-  //  primaryKey: true, 
-  //  allowNull: false
-  //},
-  //assetKey: {
-  //  type: Datatypes.INTEGER, 
-  //  allowNull: false
-  //},
-  //employeeID: {
-  //  type: Datatypes.INTEGER, 
-  //  allowNull: false
-  //},
+  eventSourceID: {
+    type: Datatypes.INTEGER, 
+    references: {
+	    model: eventSourceTable,
+	    key: 'id'
+    }
+  },
+  assetID: {
+    type: Datatypes.INTEGER, 
+    references: {
+	    model: assetTable,
+	    key: 'id'
+    }
+  },
+  employeeID: {
+    type: Datatypes.INTEGER, 
+    references: {
+	    model: employeeTable,
+	    key: 'id'
+    }
+  },
   weightedSum: {
     type: Datatypes.FLOAT, 
     allowNull: false
   },
-  //productID: {
-  //  type: Datatypes.INTEGER,
-  //  allowNull: false
-  //}
+  productID: {
+    type: Datatypes.INTEGER,
+    references: {
+	    model: productTable,
+	    key: 'id'
+    }
+  }
 }, {timestamps: false});
 
 let coachingMomentTable = sequelize.define('coachingMomentTable', {
+  id: {
+    type: Datatypes.INTEGER, 
+    primaryKey: true, 
+  },
   time: {
     type: Datatypes.DATE, 
-    primaryKey: true, 
     allowNull: false
   },
   employeeID: {
     type: Datatypes.INTEGER, 
-    primaryKey: true, 
-    allowNull: false
+    references: {
+	    model: employeeTable,
+	    key: 'id'
+    }
   },
   managerID: {
     type: Datatypes.INTEGER, 
-    allowNull: false
+    references: {
+	    model: employeeTable,
+	    key: 'id'
+    }
   },
   note: {
     type: Datatypes.TEXT,
-    allowNull: false
   }
 }, {timestamps: false});
 
 let productTable = sequelize.define('productTable', {
-  //productID: {
-  //  type: Datatypes.INTEGER,
-  //  primaryKey: true, 
-  //  allowNull: false
-  //},
+  id: {
+    type: Datatypes.INTEGER,
+    primaryKey: true, 
+  },
   productName: {
     type: Datatypes.TEXT,
     allowNull: false
@@ -139,61 +173,74 @@ let productTable = sequelize.define('productTable', {
 }, {timestamps: false});
 
 let machineStatusTable = sequelize.define('machineStatusTable', {
+  id: {
+    type: Datatypes.INTEGER, 
+    primaryKey: true, 
+  },
   time: {
     type: Datatypes.DATE, 
-    primaryKey: true, 
     allowNull: false
   },
-  //assetKey: {
-  //  type: Datatypes.INTEGER, 
-  //  primaryKey: true, 
-  //  allowNull: false
-  //},
+  assetID: {
+    type: Datatypes.INTEGER, 
+    references: {
+	    model: assetTable,
+	    key: 'id'
+    }
+  },
   status: {
     type: Datatypes.TEXT, 
     allowNull: false
   },
-  //productID: {
-  //  type: Datatypes.INTEGER, 
-  //  allowNull: false
-  //}
+  productID: {
+    type: Datatypes.INTEGER, 
+    references: {
+	    model: productTable,
+	    key: 'id'
+    }
+  }
 }, {timestamps: false});
 
 let resourceUsageTable = sequelize.define('resourceUsageTable', {
+  id: {
+    type: Datatypes.INTEGER, 
+    primaryKey: true, 
+  }
   time: {
     type: Datatypes.DATE, 
-    primaryKey: true, 
     allowNull: false
   },
-  //meterID: {
-  //  type: Datatypes.INTEGER, 
-  //  primaryKey: true, 
-  //  allowNull: false
-  //},
+  meterID: {
+    type: Datatypes.INTEGER, 
+    references: {
+	    model: meterTable,
+	    key: 'id'
+    }
+  },
   usageIncrement: {
     type: Datatypes.FLOAT, 
-    allowNull: false
   },
   unit: {
     type: Datatypes.TEXT, 
-    allowNull: false
   },
   type: {
     type: Datatypes.TEXT, 
-    allowNull: false
   },
-  //assetKey: {
-  //  type: Datatypes.INTEGER, 
-  //  allowNull: false
-  //}
+  assetID: {
+    type: Datatypes.INTEGER, 
+    references: {
+	    model: assetTable,
+	    key: 'id'
+    }
+  }
 }, {timestamps: false});
 
 let meterTable = sequelize.define('meterTable', {
-  //meterID: {
-  //  type: Datatypes.INTEGER, 
-  //  primaryKey: true, 
-  //  allowNull: false
-  //},
+  id: {
+    type: Datatypes.INTEGER, 
+    primaryKey: true, 
+    allowNull: false
+  },
   usageIncrement: {
     type: Datatypes.FLOAT, 
     allowNull: false
@@ -206,17 +253,20 @@ let meterTable = sequelize.define('meterTable', {
     type: Datatypes.TEXT, 
     allowNull: false
   },
-  //assetKey: {
-  //  type: Datatypes.INTEGER, 
-  //  allowNull: false
-  //}
+  assetID: {
+    type: Datatypes.INTEGER, 
+    references: {
+	    model: assetTable,
+	    key: 'id'
+    }
+  }
 }, {timestamps: false});
 
 let assetTable = sequelize.define('assetTable', {
-  //assetKey: {
-  //  type: Datatypes.INTEGER, 
-  //  allowNull: false
-  //},
+  id: {
+    type: Datatypes.INTEGER, 
+    allowNull: false
+  },
   assetName: {
     type: Datatypes.TEXT, 
     allowNull: false
@@ -228,11 +278,11 @@ let assetTable = sequelize.define('assetTable', {
 }, {timestamps: false});
 
 let employeeTable = sequelize.define('employeeTable', {
-  //employeeID: {
-  //  type: Datatypes.INTEGER, 
-  //  primaryKey: true,
-  //  allowNull: false
-  //},
+  id: {
+    type: Datatypes.INTEGER, 
+    primaryKey: true,
+    allowNull: false
+  },
   employeeName: {
     type: Datatypes.TEXT, 
     allowNull: false
@@ -240,65 +290,80 @@ let employeeTable = sequelize.define('employeeTable', {
 }, {timestamps: false});
 
 let locationTable = sequelize.define('locationTable', {
+  id: {
+    type: Datatypes.INTEGER, 
+    primaryKey: true,
+  }
   time: {
     type: Datatypes.DATE, 
-    primaryKey: true, 
     allowNull: false
   },
-  //employeeID: {
-  //  type: Datatypes.INTEGER, 
-  //  primaryKey: true,
-  //  allowNull: false
-  //},
-  //assetKey: {
-  //  type: Datatypes.INTEGER, 
-  //  allowNull: false
-  //},
-  //productID: {
-  //  type: Datatypes.INTEGER, 
-  //  allowNull: false
-  //}
+  employeeID: {
+    type: Datatypes.INTEGER, 
+    references: {
+	    model: employeeTable,
+	    key: 'id'
+    }
+  },
+  assetID: {
+    type: Datatypes.INTEGER, 
+    references: {
+	    model: assetTable,
+	    key: 'id'
+    }
+  },
+  productID: {
+    type: Datatypes.INTEGER, 
+    references: {
+	    model: employeeTable,
+	    key: 'id'
+    }
+  }
 }, {timestamps: false});
+
 // ========== JOINS ====================
-//assetTable.hasOne(cbwTurnsTable );
-cbwTurnsTable.belongsTo(assetTable, {as: "cbw_asset"});
-
-//assetTable.hasMany(eventSourceTable );
-eventSourceTable.belongsTo(assetTable, {as: "event_asset"});
-
-//eventSourceTable.hasMany(sensorEventTable);
-sensorEventTable.belongsTo(eventSourceTable, {as: "eventSource"});
-
-//assetTable.hasMany(sensorEventTable);
-sensorEventTable.belongsTo(assetTable, {as: "event_asset"});
-
-//employeeTable.hasMany(sensorEventTable);
-sensorEventTable.belongsTo(employeeTable, {as: "event_employee"});
-
-//productTable.hasMany(sensorEventTable);
-sensorEventTable.belongsTo(productTable, {as: "event_product"});
-
-//assetTable.hasMany(machineStatusTable);
-machineStatusTable.belongsTo(assetTable, {as: "status_asset"});
-
-//productTable.hasMany(machineStatusTable);
-machineStatusTable.belongsTo(productTable, {as: "status_product"});
-
-//meterTable.hasMany(resourceUsageTable, );
-resourceUsageTable.belongsTo(meterTable, {as: "resource_meter"});
-
-//assetTable.hasMany(resourceUsageTable);
-resourceUsageTable.belongsTo(assetTable, {as: "resource_asset"});
-
-//employeeTable.hasMany(locationTable);
-locationTable.belongsTo(employeeTable, {as: "location_employee"});
-
-//assetTable.hasMany(locationTable);
-locationTable.belongsTo(assetTable, {as: "location_asset"});
-
-//productTable.hasMany(locationTable);
-locationTable.belongsTo(productTable,{as: "location_product"});
-// ==========================================
+////assetTable.hasOne(cbwTurnsTable );
+//cbwTurnsTable.belongsTo(assetTable, {
+//	as: "cbw_asset",
+//	foreignKey: "
+//}); 
+//
+////assetTable.hasMany(eventSourceTable );
+//eventSourceTable.belongsTo(assetTable, {as: "event_asset"});
+//
+////eventSourceTable.hasMany(sensorEventTable);
+//sensorEventTable.belongsTo(eventSourceTable, {as: "eventSource"});
+//
+////assetTable.hasMany(sensorEventTable);
+//sensorEventTable.belongsTo(assetTable, {as: "event_asset"});
+//
+////employeeTable.hasMany(sensorEventTable);
+//sensorEventTable.belongsTo(employeeTable, {as: "event_employee"});
+//
+////productTable.hasMany(sensorEventTable);
+//sensorEventTable.belongsTo(productTable, {as: "event_product"});
+//
+////assetTable.hasMany(machineStatusTable);
+//machineStatusTable.belongsTo(assetTable, {as: "status_asset"});
+//
+////productTable.hasMany(machineStatusTable);
+//machineStatusTable.belongsTo(productTable, {as: "status_product"});
+//
+////meterTable.hasMany(resourceUsageTable, );
+//resourceUsageTable.belongsTo(meterTable, {as: "resource_meter"});
+//
+////assetTable.hasMany(resourceUsageTable);
+//resourceUsageTable.belongsTo(assetTable, {as: "resource_asset"});
+//
+////employeeTable.hasMany(locationTable);
+//locationTable.belongsTo(employeeTable, {as: "location_employee"});
+//
+////assetTable.hasMany(locationTable);
+//locationTable.belongsTo(assetTable, {as: "location_asset"});
+//
+////productTable.hasMany(locationTable);
+//locationTable.belongsTo(productTable,{as: "location_product"});
+//// ==========================================
 //
 
 (async () => {
@@ -499,6 +564,7 @@ const cbwTurnsTableInsert = async (data) => {
 	    }
     });
     const success = await cbwTurnsTable.create({
+
 	  time: time,
 	  cbw_asset: row[0]["dataValues"]["cbw_asset"],
 	  exitingProductID: data.exitingProductID,
@@ -621,6 +687,14 @@ app.post('/insert/chunk/:table', async (req, res, next) => {
 	return next(e);
     }
 });
+//================= TODO add id primary keys to 
+// resource Usage Table
+// Location Table
+// machine Table
+// coaching Table 
+// sensor Event Table
+// cbw Turns Table
+//
 app.post('/insert/migrate', async (req, res, next) => {
     try {
 	let data = req.body.data;
