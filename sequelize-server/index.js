@@ -31,11 +31,85 @@ const sequelize = new Sequelize(
 //    }
   });
 
+let assetTable = sequelize.define('assetTable', {
+  id: {
+    type: Datatypes.INTEGER, 
+    primaryKey: true,
+    autoIncrement: true,
+  },
+  assetName: {
+    type: Datatypes.TEXT, 
+    allowNull: false
+  },
+  status: {
+    type: Datatypes.TEXT, 
+    allowNull: false
+  }
+}, {timestamps: false});
+
+let employeeTable = sequelize.define('employeeTable', {
+  id: {
+    type: Datatypes.INTEGER, 
+    primaryKey: true,
+    autoIncrement: true,
+    allowNull: false,
+  },
+  employeeName: {
+    type: Datatypes.TEXT, 
+    allowNull: false
+  }
+}, {timestamps: false});
+
+let productTable = sequelize.define('productTable', {
+  id: {
+    type: Datatypes.INTEGER,
+    primaryKey: true, 
+    autoIncrement: true,
+  },
+  productName: {
+    type: Datatypes.TEXT,
+    allowNull: false
+  },
+  weight: {
+    type: Datatypes.FLOAT,
+    allowNull: false
+  }
+}, {timestamps: false});
+
+let meterTable = sequelize.define('meterTable', {
+  id: {
+    type: Datatypes.INTEGER, 
+    primaryKey: true, 
+    allowNull: false,
+    autoIncrement: true,
+  },
+  usageIncrement: {
+    type: Datatypes.FLOAT, 
+    allowNull: false
+  },
+  unit: {
+    type: Datatypes.TEXT, 
+    allowNull: false
+  },
+  type: {
+    type: Datatypes.TEXT, 
+    allowNull: false
+  },
+  assetID: {
+    type: Datatypes.INTEGER, 
+    references: {
+	    model: assetTable,
+	    key: 'id'
+    }
+  }
+}, {timestamps: false});
+
 let cbwTurnsTable = sequelize.define('cbwTurnsTable', {
   id: {
     type: Datatypes.INTEGER, 
     primaryKey: true,
-  }
+    autoIncrement: true,
+  },
   time: {
     type: Datatypes.DATE, 
     allowNull: false
@@ -67,7 +141,8 @@ let eventSourceTable = sequelize.define('eventSourceTable', {
   id: {
     type: Datatypes.INTEGER, 
     primaryKey: true, 
-    allowNull: false
+    allowNull: false,
+    autoIncrement: true,
   },
   macAddress: {
     type: Datatypes.TEXT, 
@@ -89,7 +164,8 @@ let eventSourceTable = sequelize.define('eventSourceTable', {
 let sensorEventTable = sequelize.define('sensorEventTable', {
   id: {
     type: Datatypes.INTEGER, 
-    primaryKey: true
+    primaryKey: true,
+    autoIncrement: true,
   },
   time: {
     type: Datatypes.DATE, 
@@ -133,6 +209,7 @@ let coachingMomentTable = sequelize.define('coachingMomentTable', {
   id: {
     type: Datatypes.INTEGER, 
     primaryKey: true, 
+    autoIncrement: true,
   },
   time: {
     type: Datatypes.DATE, 
@@ -157,25 +234,12 @@ let coachingMomentTable = sequelize.define('coachingMomentTable', {
   }
 }, {timestamps: false});
 
-let productTable = sequelize.define('productTable', {
-  id: {
-    type: Datatypes.INTEGER,
-    primaryKey: true, 
-  },
-  productName: {
-    type: Datatypes.TEXT,
-    allowNull: false
-  },
-  weight: {
-    type: Datatypes.FLOAT,
-    allowNull: false
-  }
-}, {timestamps: false});
 
 let machineStatusTable = sequelize.define('machineStatusTable', {
   id: {
     type: Datatypes.INTEGER, 
     primaryKey: true, 
+    autoIncrement: true,
   },
   time: {
     type: Datatypes.DATE, 
@@ -205,7 +269,8 @@ let resourceUsageTable = sequelize.define('resourceUsageTable', {
   id: {
     type: Datatypes.INTEGER, 
     primaryKey: true, 
-  }
+    autoIncrement: true,
+  },
   time: {
     type: Datatypes.DATE, 
     allowNull: false
@@ -235,65 +300,14 @@ let resourceUsageTable = sequelize.define('resourceUsageTable', {
   }
 }, {timestamps: false});
 
-let meterTable = sequelize.define('meterTable', {
-  id: {
-    type: Datatypes.INTEGER, 
-    primaryKey: true, 
-    allowNull: false
-  },
-  usageIncrement: {
-    type: Datatypes.FLOAT, 
-    allowNull: false
-  },
-  unit: {
-    type: Datatypes.TEXT, 
-    allowNull: false
-  },
-  type: {
-    type: Datatypes.TEXT, 
-    allowNull: false
-  },
-  assetID: {
-    type: Datatypes.INTEGER, 
-    references: {
-	    model: assetTable,
-	    key: 'id'
-    }
-  }
-}, {timestamps: false});
 
-let assetTable = sequelize.define('assetTable', {
-  id: {
-    type: Datatypes.INTEGER, 
-    allowNull: false
-  },
-  assetName: {
-    type: Datatypes.TEXT, 
-    allowNull: false
-  },
-  status: {
-    type: Datatypes.TEXT, 
-    allowNull: false
-  }
-}, {timestamps: false});
-
-let employeeTable = sequelize.define('employeeTable', {
-  id: {
-    type: Datatypes.INTEGER, 
-    primaryKey: true,
-    allowNull: false
-  },
-  employeeName: {
-    type: Datatypes.TEXT, 
-    allowNull: false
-  }
-}, {timestamps: false});
 
 let locationTable = sequelize.define('locationTable', {
   id: {
     type: Datatypes.INTEGER, 
     primaryKey: true,
-  }
+    autoIncrement: true,
+  },
   time: {
     type: Datatypes.DATE, 
     allowNull: false
@@ -363,6 +377,8 @@ let locationTable = sequelize.define('locationTable', {
 //
 ////productTable.hasMany(locationTable);
 //locationTable.belongsTo(productTable,{as: "location_product"});
+
+meterTable.hasOne(assetTable, {foreignKey: 'id', targetKey: 'assetID'});
 //// ==========================================
 //
 
@@ -400,11 +416,10 @@ app.get('/', async (req, res) => {
 const meterTableInsert = async (data) => {
 	// UPDATE IF RECORD EXISTS
         const success = await meterTable.upsert({
-		resource_meter: data.meterID,
 		usageIncrement: data.usageIncrement,
 		unit: data.unit,
 		type: data.type,
-		meter_asset: data.assetKey,
+		assetID: data.assetID,
         });
 	return success;
 };
@@ -415,14 +430,14 @@ const locationTableInsert = async (data) => {
 	console.log('data', data);
     const machineStatusRow = await machineStatusTable.findOne({
 	    where: {
-		    status_asset: data.assetKey
+		    assetID: data.assetID
 	    }
     });
     const success = await locationTable.create({
 		time: time,
-		location_employee: data.employeeID,
-		location_asset: data.assetKey,
-		location_product: machineStatusRow["dataValues"]["location_product"]
+	    	employeeID: data.employeeID,
+	    	assetID: data.assetID,
+		productID: machineStatusRow[0]["dataValues"]["productID"],
     });
     return success;
 };
@@ -430,24 +445,22 @@ const locationTableInsert = async (data) => {
 // web page
 const employeeTableInsert = async (data) => {
 	// UPDATE IF RECORD EXISTS
-    const success = await employeeTable.upsert({
-		event_employee: data.employeeID,
-		location_employee: data.employeeID,
-		employeeName: data.employeeName
-	});
-    return success;
+    try {
+	    const success = await employeeTable.upsert({
+			employeeName: data.employeeName
+		});
+	    console.log("successful insert: ", success);
+	    return success;
+    } catch (err) {
+	    console.log("ERROR: failed to insert ", err);
+	    return err;
+    }
 };
 // editable table receives data from user interaction of 
 // web page
 const assetTableInsert = async (data) => {
 	// UPDATE IF RECORD EXISTS
     const success = await assetTable.upsert({
-		cbw_asset: data.assetKey,
-		meter_asset: data.assetKey,
-		event_asset: data.assetKey,
-		status_asset: data.assetKey,
-		resource_asset: data.assetKey,
-		location_asset: data.assetKey,
 		assetName: data.assetName,
 		status: data.status
         });
@@ -458,16 +471,16 @@ const resourceUsageTableInsert = async (data) => {
 	// query usageIncrement, unit, type, assetKey from meterTable 
     const meterTableRow = await meterTable.findAll({
 	    where: {
-		    resource_asset: data.meterID
+		    id: data.meterID
 	    }
     });
     const success = await resourceUsageTable.create({
 		time: time,
-		resource_meter: data.meterID,
+	    	meterID: data.meterID,
 		usageIncrement: meterTableRow[0]["dataValues"]["usageIncrement"],
 		unit: meterTableRow[0]["dataValues"]["unit"],
 		type: meterTableRow[0]["dataValues"]["type"],
-		resource_asset: meterTableRow[0]["dataValues"]["resource_asset"]
+	        assetID: meterTableRow[0]["dataValues"]["assetID"],
         });
     return success;
 };
@@ -476,14 +489,14 @@ const machineStatusTableInsert = async (data) => {
 	// query status from assetTable
     const assetTableRow = await assetTable.findAll({
 	    where: {
-		    status_asset: data.assetKey
+		    id: data.assetID
 	    }
     });
     const success = await machineStatusTable.create({
 		time: time,
-		status_asset: data.assetKey, 
 		status: assetTableRow[0]["dataValues"]["status"],
-		status_product: data.productID
+	        assetID: data.assetID,
+	        productID: data.productID,
         })
     return success;
 };
@@ -492,9 +505,6 @@ const machineStatusTableInsert = async (data) => {
 const productTableInsert = async (data) => {
 	// UPDATE IF RECORD EXISTS
     const success = await productTable.upsert({
-		event_product: data.productID,
-		location_product: data.productID,
-		status_product: data.productID,
 		productName: data.productName,
 		weight: data.weight
         });
@@ -525,19 +535,18 @@ const sensorEventTableInsert = async (data) => {
 	// findOne only returns most recent matching entry
     const locationRow = await locationTable.findOne({
 	    where: {
-		    location_asset: eventSourceRow[0]["dataValues"]["event_asset"]
-
+		    assetID: eventSourceRow[0]["dataValues"]["assetID"]
 	    }
     });
 	// query eventSourceID, assetKey, weightedSum from eventSourceTable
 	// employeeID, productID from locationTable
     const success = await sensorEventTable.create({
 		time: time,
-		eventSource: eventSourceRow[0]["dataValues"]["eventSource"],
-		event_asset: eventSourceRow[0]["dataValues"]["event_asset"],
-		event_employee: locationRow["dataValues"]["event_employee"],
+		eventSourceID: eventSourceRow[0]["dataValues"]["id"],
 		weightedSum: eventSourceRow[0]["dataValues"]["weightedSum"],
-		event_product: locationRow["dataValues"]["event_product"]
+	    	assetID: locationRow[0]["dataValues"]["assetID"],
+	    	emloyeeID: locationRow[0]["dataValues"]["employeeID"],
+	    	productID: locationRow[0]["dataValues"]["productID"],
         });
     return success;
 };
@@ -548,8 +557,7 @@ const eventSourceTableInsert = async (data) => {
     const time = new Date().getTime();
     const success = await eventSourceTable.upsert({
 		macAddress: data.macAddress,
-		eventSource: data.eventSource,
-		event_asset: data.assetKey,
+		assetID: data.assetID,
 		weightedSum: data.weightedSum,
         });
     return success;
@@ -558,17 +566,16 @@ const cbwTurnsTableInsert = async (data) => {
     const time = new Date().getTime();
 	// query assetKey from eventSourceTable
 	console.log('data', data)
-    const row = await eventSourceTable.findAll({
+    const eventSourceRow = await eventSourceTable.findAll({
 	    where: {
 		    macAddress: data.macAddress
 	    }
     });
     const success = await cbwTurnsTable.create({
-
 	  time: time,
-	  cbw_asset: row[0]["dataValues"]["cbw_asset"],
+	  assetID: eventSourceRow[0]["dataValues"]["assetID"],
 	  exitingProductID: data.exitingProductID,
-	  enteringProductID: data.enteringProductID
+	  enteringProductID: data.enteringProductID,
         })
     return success;
 };
@@ -717,7 +724,7 @@ app.post('/insert/migrate', async (req, res, next) => {
 			      time: +data.time,
 			      assetKey: data.assetKey,
 			      exitingProductID: data.exitingProductID,
-			      enteringProductID: data.enteringProductID
+			      enteringProductID: data.enteringProductID,
 			    })
 		};
 	} else if (total === 51) {
@@ -797,13 +804,24 @@ app.post('/delete/:table', async (req, res, next) => {
 	const table = req.params.table; 
 	const body = req.body;
 	const tableHandle = validTables[table];
-	const row = await tableHandle.destroy({
-		where: {
-			[Sequelize.Op.and]: [
-				body
-			]
+	const row = "ERROR: could not delete";
+	try {
+		row = await tableHandle.destroy({
+			where: {
+				[Sequelize.Op.and]: [
+					body
+				]
+			}
+		});
+	} catch {
+		try {
+			row = await tableHandle.destroy({
+				where: body
+
+			});
+		} catch {
 		}
-	});
+	}
         res.json(row);
     } catch (e) {
 	return next(e);
@@ -842,6 +860,39 @@ app.get('/read/:table', async (req, res, next) => {
     } catch (e) {
 	return next(e);
     }
+})
+app.get('/v1/read/:table', async (req, res, next) => {
+	function filterForRequiredFields(fields, rawRows) {
+		// fields = ['id', 'usageIncrement', 'unit', 'type', 'assetName' ]
+		// filter through rawRows
+		// return { id: 1, usageIncrement: 50, unit: m3, type: gas, assetName: 'CBW 3' }
+	}
+	try {
+	    const table = req.params.table; 
+	    const tableHandle = validTables[table];
+	    const rawRows = await tableHandle.findAll({
+	    	include: assetTable,
+	    });
+	    console.log(rawRows);
+	    let row = [];
+	    for(let i = 0; i < rawRows.length; i++) {
+	    	try {
+	    		let nextRow = {
+	    			id: rawRows[i].id,
+	    			usageIncrement: rawRows[i].usageIncrement,
+	    			unit: rawRows[i].unit,
+	    			type: rawRows[i].type,
+	    			assetName: rawRows[i].assetTable.assetName,
+	    		}
+	    		row[i] = nextRow;
+	    	} catch (err){
+	    		row[i] = { error: err};
+	    	}
+	    }
+	    res.json(row);
+	} catch (e) {
+	    return next(e);
+	}
 })
 app.get('/data/:format/:start/:end', async (req, res, next) => {
 	try {

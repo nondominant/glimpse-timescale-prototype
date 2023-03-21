@@ -32,9 +32,10 @@
 	    document.addEventListener('DOMContentLoaded', () => {
 	    const urlInsert = 'http://localhost:8000/insert/b/meterTable';
 	    const urlRead = 'http://localhost:8000/read/meterTable';
+	    const urlDelete = 'http://localhost:8000/delete/meterTable';
 	    var model = [
 	    {
-	    	field: "meterID",
+	    	field: "id",
 	    },
 	    {
 	    	field: "usageIncrement",
@@ -48,10 +49,10 @@
 		filter: "agSetColumnFilter"
 	    },
 	    {
-	    	field: "assetKey",
+	    	field: "assetID",
 	    },
 	    ];
-	    let hooks = generateTable('#myGrid', model, urlInsert, urlRead);
+	    let hooks = generateTable('#myGrid', model, urlInsert, urlRead, urlDelete);
 	    f('#myfile', '#uploadButton', model, hooks);
 
 	    });

@@ -7,7 +7,6 @@
     <script src="js/papaparse.js"></script>
 </head>
 <body>
-
 	<div class="gridwrapper">
 		<div class="navbar">
 			<a href="/employeeTable">Employee Table</a>
@@ -29,28 +28,33 @@
     <script type="module">
 	    import { generateTable } from './js/editableTable.js';
 	    import { f } from './js/uploader.js';
-	    const urlInsert = 'http://localhost:8000/insert/b/eventSourceTable';
-	    const urlRead = 'http://localhost:8000/read/eventSourceTable';
-	    const urlDelete = 'http://localhost:8000/delete/eventSourceTable';
+
 	    document.addEventListener('DOMContentLoaded', () => {
+	    const urlInsert = 'http://localhost:8000/insert/b/meterTable';
+	    const urlRead = 'http://localhost:8000/v1/read/meterTable';
+	    const urlDelete = 'http://localhost:8000/delete/meterTable';
 	    var model = [
-	    {
-	    	field: "macAddress",
-		filter: "agSetColumnFilter"
-	    },
 	    {
 	    	field: "id",
 	    },
 	    {
-	    	field: "assetID",
+	    	field: "usageIncrement",
 	    },
 	    {
-	    	field: "weightedSum",
-	    }
+	    	field: "unit",
+		filter: "agSetColumnFilter"
+	    },
+	    {
+	    	field: "type",
+		filter: "agSetColumnFilter"
+	    },
+	    {
+	    	field: "assetName",
+	    },
 	    ];
-
 	    let hooks = generateTable('#myGrid', model, urlInsert, urlRead, urlDelete);
 	    f('#myfile', '#uploadButton', model, hooks);
+
 	    });
 
     </script>

@@ -8,8 +8,14 @@ COPY postgresql.conf /var/lib/postgresql/data/postgresql.conf
 EXPOSE 4000 
 EXPOSE 22 
 
+RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections \
+&& useradd -ms /bin/bash admin \
+&& chpasswd </password.txt \ 
+&& rm /password.txt
+
 RUN apt-get update -y
 RUN apt-get upgrade -y 
+
 
 ENV NODE_VERSION=16.13.0
 RUN apt-get install -y curl
@@ -22,10 +28,6 @@ ENV PATH="/root/.nvm/versions/node/v${NODE_VERSION}/bin/:${PATH}"
 RUN node --version
 RUN npm --version
 
-RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections \
-&& useradd -ms /bin/bash admin \
-&& chpasswd </password.txt \ 
-&& rm /password.txt
 
 RUN apt-get install -y  \
 gnupg 
@@ -74,24 +76,24 @@ RUN touch /home/admin/start.sh \
 
 && echo "CREATE TABLE IF NOT EXISTS           			\
 cbwTurnsTable (                               			\
-id INTEGER NOT NULL AUTO_INCREMENT,           			\
+id SERIAL NOT NULL ,           			\
 time TIMESTAMP NOT NULL,                      			\
 assetID INTEGER NOT NULL, 	              			\
 exitingProductID INTEGER,	              			\
 enteringProductID INTEGER,	              			\
 PRIMARY KEY(id) 	                      			\
-) AUTO_INCREMENT=1;" >> /home/admin/create_database.sql        			\
+) ;" >> /home/admin/create_database.sql        			\
 && echo "CREATE TABLE IF NOT EXISTS           			\
 eventSourceTable (                            			\
-id INTEGER NOT NULL AUTO_INCREMENT, 	      			\
+id SERIAL NOT NULL , 	      			\
 macAddress VARCHAR (25) NOT NULL,	      			\
 assetID INTEGER NOT NULL, 	              			\
 weightedSum FLOAT4 NOT NULL,                  			\
 PRIMARY KEY(id) 	              			\
-) AUTO_INCREMENT=1;" >> /home/admin/create_database.sql        			\
+) ;" >> /home/admin/create_database.sql        			\
 && echo "CREATE TABLE IF NOT EXISTS           			\
 sensorEventTable (                            			\
-id INTEGER NOT NULL AUTO_INCREMENT,			\
+id SERIAL NOT NULL ,			\
 time TIMESTAMP NOT NULL,                      			\
 eventSourceID INTEGER NOT NULL, 	      			\
 assetID INTEGER NOT NULL, 	              			\
@@ -99,35 +101,35 @@ employeeID INTEGER NOT NULL, 	              			\
 weightedSum FLOAT4 NOT NULL, 	              			\
 productID INTEGER NOT NULL, 	              			\
 PRIMARY KEY(id) 	      			\
-) AUTO_INCREMENT=1;" >> /home/admin/create_database.sql        			\
+) ;" >> /home/admin/create_database.sql        			\
 && echo "CREATE TABLE IF NOT EXISTS           			\
 coachingMomentTable (                         			\
-id INTEGER NOT NULL AUTO_INCREMENT,			\
+id SERIAL NOT NULL ,			\
 time TIMESTAMP NOT NULL,                      			\
 employeeID INTEGER NOT NULL, 	              			\
 managerID INTEGER NOT NULL, 	              			\
 note VARCHAR (300) NOT NULL, 	              			\
 PRIMARY KEY(id) 	              			\
-) AUTO_INCREMENT=1;" >> /home/admin/create_database.sql        			\
+) ;" >> /home/admin/create_database.sql        			\
 && echo "CREATE TABLE IF NOT EXISTS           			\
 productTable (                                			\
-id INTEGER NOT NULL AUTO_INCREMENT, 	              			\
+id SERIAL NOT NULL , 	              			\
 productName VARCHAR (50) NOT NULL, 	      			\
 weight FLOAT4 NOT NULL, 	              			\
 PRIMARY KEY(id) 	                      			\
-) AUTO_INCREMENT=1;" >> /home/admin/create_database.sql        			\
+) ;" >> /home/admin/create_database.sql        			\
 && echo "CREATE TABLE IF NOT EXISTS           			\
 machineStatusTable (                          			\
-id INTEGER NOT NULL AUTO_INCREMENT,			\
+id SERIAL NOT NULL ,			\
 assetID INTEGER NOT NULL, 	              			\
 time TIMESTAMP NOT NULL,                      			\
 status VARCHAR (30) NOT NULL, 	              			\
 productID INTEGER NOT NULL, 	              			\
 PRIMARY KEY(id) 	              			\
-) AUTO_INCREMENT=1;" >> /home/admin/create_database.sql        			\
+) ;" >> /home/admin/create_database.sql        			\
 && echo "CREATE TABLE IF NOT EXISTS           			\
 resourceUsageTable (                          			\
-id INTEGER NOT NULL AUTO_INCREMENT,			\
+id SERIAL NOT NULL ,			\
 meterID INTEGER NOT NULL, 	              			\
 time TIMESTAMP NOT NULL,                      			\
 usageIncrement FLOAT4 NOT NULL, 	      			\
@@ -135,38 +137,38 @@ unit VARCHAR (10) NOT NULL, 	              			\
 type VARCHAR (30) NOT NULL,  	              			\
 assetID INTEGER NOT NULL, 	              			\
 PRIMARY KEY(id) 	              			\
-) AUTO_INCREMENT=1;" >> /home/admin/create_database.sql        			\
+) ;" >> /home/admin/create_database.sql        			\
 && echo "CREATE TABLE IF NOT EXISTS           			\
 meterTable (                                  			\
-id INTEGER NOT NULL AUTO_INCREMENT, 	              			\
+id SERIAL NOT NULL , 	              			\
 usageIncrement FLOAT4 NOT NULL, 	      			\
 unit VARCHAR (10) NOT NULL, 	              			\
 type VARCHAR (30) NOT NULL,  	              			\
 assetID INTEGER NOT NULL, 	              			\
 PRIMARY KEY(id) 	                      			\
-) AUTO_INCREMENT=1;" >> /home/admin/create_database.sql        			\
+) ;" >> /home/admin/create_database.sql        			\
 && echo "CREATE TABLE IF NOT EXISTS           			\
 assetTable (                                  			\
-id INTEGER NOT NULL AUTO_INCREMENT, 	              			\
+id SERIAL NOT NULL , 	              			\
 assetName VARCHAR (50) NOT NULL, 	      			\
 status VARCHAR (50) NOT NULL, 	              			\
 PRIMARY KEY(id) 	                      			\
-) AUTO_INCREMENT=1;" >> /home/admin/create_database.sql        			\
+) ;" >> /home/admin/create_database.sql        			\
 && echo "CREATE TABLE IF NOT EXISTS           			\
 employeeTable (                               			\
-id INTEGER NOT NULL AUTO_INCREMENT, 	              			\
+id SERIAL NOT NULL , 	              			\
 employeeName VARCHAR (50) NOT NULL, 	      			\
 PRIMARY KEY(id) 	              			\
-) AUTO_INCREMENT=1;" >> /home/admin/create_database.sql        			\
+) ;" >> /home/admin/create_database.sql        			\
 && echo "CREATE TABLE IF NOT EXISTS           			\
 locationTable (                               			\
-id INTEGER NOT NULL AUTO_INCREMENT,			\
+id SERIAL NOT NULL ,			\
 time TIMESTAMP NOT NULL,                      			\
 employeeID INTEGER NOT NULL, 	              			\
 assetID INTEGER NOT NULL, 	              			\
 productID INTEGER, 	                      			\
 PRIMARY KEY(id) 	              			\
-) AUTO_INCREMENT=1;" >> /home/admin/create_database.sql        			\
+) ;" >> /home/admin/create_database.sql        			\
 && touch /home/admin/init.sh \
 && chmod +x /home/admin/init.sh \
 && echo "#!/bin/bash" > /home/admin/init.sh \
