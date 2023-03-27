@@ -39,10 +39,10 @@ if __name__ == '__main__':
 #
 #        {'url' : 'http://localhost:8000/insert/b/productTable', 'data' : {'productName':'pillow slip', 'weight':'0.7'}},
 #        {'url' : 'http://localhost:8000/insert/b/productTable', 'data' : {'productName':'king sheet', 'weight':'1.1'}},
-#
 
-        {'url' : 'http://localhost:8000/insert/b/meterTable', 'data' : {'usageIncrement':'30', 'unit':'m3', 'type':'water','assetID':'1'}},
-        {'url' : 'http://localhost:8000/insert/b/meterTable', 'data' : {'usageIncrement':'30', 'unit':'m3', 'type':'water','assetID':'2'}},
+
+#        {'url' : 'http://localhost:8000/insert/b/meterTable', 'data' : {'usageIncrement':'30', 'unit':'m3', 'type':'water','assetID':'1'}},
+#        {'url' : 'http://localhost:8000/insert/b/meterTable', 'data' : {'usageIncrement':'30', 'unit':'m3', 'type':'water','assetID':'2'}},
 
         ]
     Source = [
@@ -67,8 +67,8 @@ if __name__ == '__main__':
 #        process_handles.append(Process(target=send_event_minutely, args=(r['url'], r['data'], 0)))
 
     # event source
-#    for t in Source: 
-#        process_handles.append(Process(target=send_event_minutely, args=(t['url'], t['data'], 0)))
+    for t in Source: 
+        process_handles.append(Process(target=send_event_minutely, args=(t['url'], t['data'], 0)))
 
 #    for t in employee: 
 #        process_handles.append(Process(target=send_event_minutely, args=(t['url'], t['data'], 0)))
@@ -77,8 +77,8 @@ if __name__ == '__main__':
     # asset table
     # product table
     # meter table
-    for w in Static: 
-        process_handles.append(Process(target=send_event_minutely, args=(w['url'], w['data'], 0)))
+#    for w in Static: 
+#        process_handles.append(Process(target=send_event_minutely, args=(w['url'], w['data'], 0)))
 #
 #    # cbw
 #    for z in cbw: 

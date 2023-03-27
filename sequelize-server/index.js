@@ -3,7 +3,9 @@ const app = express()
 const port = 4000;
 const Sequelize = require('sequelize');
 const Datatypes = require('sequelize/lib/data-types');
+const cors = require('cors');
 
+app.use(cors());
 app.use(express.json());
 
 const sequelize = new Sequelize(
@@ -462,7 +464,7 @@ const assetTableInsert = async (data) => {
 	// UPDATE IF RECORD EXISTS
     const success = await assetTable.upsert({
 		assetName: data.assetName,
-		status: data.status
+		status: data.status //get rid of status here, send status with every machine status event
         });
     return success;
 };

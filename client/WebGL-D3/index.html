@@ -1,0 +1,102 @@
+<html>
+	<head>
+    <meta charset="utf-8">
+    <title>My D3.js Example</title>
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+	</head>
+	<body>
+<style>
+.annotation {
+	height: 40px;
+	width: 100px;
+	border-radius: 2px;
+	background-color: grey;
+	color: white;
+}
+</style>
+		<svg width="500" height="500"></svg>
+	<script>
+
+		// Sample data
+var data = [
+  {x: 0, y: 10, z: true},
+  {x: 1, y: 20, z: false},
+  {x: 2, y: 30, z: true},
+  {x: 3, y: 25, z: true},
+  {x: 4, y: 15, z: false},
+  {x: 5, y: 5, z: true},
+  {x: 6, y: 10, z: false},
+  {x: 7, y: 20, z: true},
+  {x: 8, y: 30, z: false},
+  {x: 9, y: 25, z: true},
+  {x: 10, y: 15, z: true}
+];
+
+var data2 = [
+  {x: 0, z: false},
+  {x: 1, z: false},
+  {x: 2, z: true},
+  {x: 3, z: true},
+  {x: 4, z: false},
+  {x: 5, z: true},
+  {x: 6, z: false},
+  {x: 7, z: true},
+  {x: 8, z: true},
+  {x: 9, z: true},
+  {x: 10, z: true}
+];
+// Set the dimensions of the SVG element
+var width = 500;
+var height = 300;
+
+// Set the margins
+var margin = {top: 20, right: 20, bottom: 30, left: 50};
+
+// Set the range for the x-axis
+var x_scale = d3.scaleLinear()
+  .domain(d3.extent(data, function(d) { return d.x; }))
+  .range([margin.left, width - margin.right]);
+
+// Set the range for the y-axis
+var y_scale = d3.scaleLinear()
+  .domain([0, d3.max(data, function(d) { return d.y; })])
+  .range([height - margin.bottom, margin.top]);
+
+// Set the colors for the background sections
+var colors = {true: '#cce5ff', false: '#f8d7da'};
+var colors2 = {true: '#ff00ff', false: '#f8ffda'};
+
+// Create the SVG element
+var svg = d3.select('svg')
+  .attr('width', width)
+  .attr('height', height);
+
+var sections = svg.selectAll('rect')
+  .data(data)
+  .enter()
+  .append('rect')
+  .attr('x', function(d) { return x_scale(d.x); })
+  .attr('y', margin.top)
+  .attr('width', 10)
+  .attr('height', height - margin.top - margin.bottom)
+  .attr('fill', function(d) { return colors2[d.z]; })
+  .attr('opacity', 0.4);
+
+
+// Create the line
+var line = d3.line()
+  .x(function(d) { return x_scale(d.x); })
+  .y(function(d) { return y_scale(d.y); });
+
+// Draw the line
+svg.append('path')
+  .datum(data)
+  .attr('fill', 'none')
+  .attr('stroke', 'steelblue')
+  .attr('stroke-width', 2)
+  .attr('d', line);
+
+
+	</script>
+	</body>
+</html>

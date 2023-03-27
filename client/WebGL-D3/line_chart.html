@@ -1,0 +1,120 @@
+<html>
+	<head>
+    <meta charset="utf-8">
+    <title>My D3.js Example</title>
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+	</head>
+	<body>
+<style>
+.annotation {
+	height: 40px;
+	width: 100px;
+	border-radius: 2px;
+	background-color: grey;
+	color: white;
+}
+</style>
+	<script>
+		// Set up the chart dimensions
+var margin = { top: 50, right: 50, bottom: 50, left: 50 };
+var width = 800 - margin.left - margin.right;
+var height = 400 - margin.top - margin.bottom;
+
+// Create the svg element
+var svg = d3.select("body")
+  .append("svg")
+  .attr("width", width + margin.left + margin.right)
+  .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+  .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+// Set up the data
+var data = [
+  { date: new Date(2022, 0, 1), value: 10 },
+  { date: new Date(2022, 1, 1), value: 20 },
+  { date: new Date(2022, 2, 1), value: 15 },
+  { date: new Date(2022, 3, 1), value: null },
+  { date: new Date(2022, 4, 1), value: null },
+  { date: new Date(2022, 5, 1), value: 25 },
+  { date: new Date(2022, 6, 1), value: 30 },
+  { date: new Date(2022, 9, 1), value: 45 },
+  { date: new Date(2022, 10, 1), value: 50 },
+  { date: new Date(2022, 11, 1), value: 55 }
+];
+
+// Set up the x and y scales
+var x = d3.scaleTime()
+  .domain(d3.extent(data, function(d) { return d.date; }))
+  .range([0, width]);
+
+var y = d3.scaleLinear()
+  .domain([0, d3.max(data, function(d) { return d.value; })])
+  .range([height, 0]);
+
+// Set up the line
+
+var normal = svg.append("path")
+  .datum(data.filter(function(d) { return d.value !== null; }))
+  .attr("fill", "none")
+  .attr("stroke", "purple")
+  .attr("stroke-width", 2)
+  .attr("stroke-linejoin", "round")
+  .attr("stroke-linecap", "round")
+  .attr("d", d3.line()
+    .x(function(d) { return x(d.date); })
+    .y(function(d) { return y(d.value); })
+    .curve(d3.curveLinear));
+
+svg.selectAll("circle")
+  .data(data.filter(function(d) { return d.value !== null; }))
+  .enter().append("circle")
+    .attr("cx", function(d) { return x(d.date); })
+    .attr("cy", function(d) { return y(d.value); })
+    .attr("r", 4)
+    .attr("fill", "purple");
+
+// Draw the solid line
+svg.append("path")
+  .datum(data)
+  .attr("class", "line")
+  .attr("d", normal);
+
+var lineMissing = d3.line()
+  .defined(function(d) { return d.value === null; })
+  .x(function(d) { return x(d.date); })
+  .y(function(d) {
+    if (d.value === null) {
+      // Find the nearest non-null values
+      var prev = data.slice(0, data.indexOf(d)).reverse().find(function(e) { return e.value !== null; });
+      var next = data.slice(data.indexOf(d) + 1).find(function(e) { return e.value !== null; });
+
+      // Interpolate the missing value
+      if (prev && next) {
+        var interpolator = d3.interpolateNumber(prev.value, next.value);
+        return y(interpolator((d.date - prev.date) / (next.date - prev.date)));
+      }
+    } else {
+      return y(d.value);
+    }
+  })
+  .curve(d3.curveLinear);
+
+
+svg.append("path")
+  .datum(data)
+  .attr("class", "lineMissing")
+  .attr("d", lineMissing);
+
+// Add the x-axis
+svg.append("g")
+  .attr("transform", "translate(0," + height + ")")
+  .call(d3.axisBottom(x));
+
+// Add the y-axis
+svg.append("g")
+  .call(d3.axisLeft(y));
+
+	</script>
+
+	</body>
+</html>
